@@ -46,7 +46,7 @@ func (s *stringArrayValue) ResetWith(val []string) error {
 	return nil
 }
 
-func (s *stringArrayValue) GetSlice() []string {
+func (s *stringArrayValue) GetStringArray() []string {
 	out := make([]string, len(*s.value))
 	copy(out, *s.value)
 	return out
@@ -57,7 +57,7 @@ func (s *stringArrayValue) Type() string {
 }
 
 func (s *stringArrayValue) Get() interface{} {
-	return s.GetSlice()
+	return s.GetStringArray()
 }
 
 func (s *stringArrayValue) String() string {
@@ -119,7 +119,7 @@ func (s *stringArrayLValue) Set(val string, doAppend bool) error {
 	return nil
 }
 
-func (s *stringArrayLValue) Replace(val []string) error {
+func (s *stringArrayLValue) ResetWith(val []string) error {
 	if s.max >= 0 && len(val) > s.max {
 		return ErrorLengthOverflow{"length", ">", s.max}
 	}
@@ -144,7 +144,7 @@ func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddStringArrayFromCSV(name, shortName string, value []string, p *[]string) *Opt {
-	v := newStringArrayValue(value, p)
+func (commandConfig *CommandConfig) AddStringArrayFromCSV(name, shortName string, value string, p *[]string) *Opt {
+	v := newStringArrayValueFromCSV(value, p)
 	return commandConfig.AddValue(name, shortName, v)
 }

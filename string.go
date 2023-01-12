@@ -26,7 +26,9 @@ func (s *stringValue) Get() interface{} {
 	return s.String()
 }
 
-func (s *stringValue) String() string { return string(*s) }
+func (s *stringValue) GetString() string { return string(*s) }
+
+func (s *stringValue) String() string { return s.GetString() }
 
 // func stringConv(sval string) (interface{}, error) {
 // 	return sval, nil

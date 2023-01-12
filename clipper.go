@@ -293,7 +293,9 @@ func (registry Registry) Parse(values []string) (string, error) {
 						if !opt.Validate(nextValue) {
 							return commandName, ErrorUnsupportedValue{opt.Name, nextValue}
 						}
-						opt.Set(nextValue)
+						if err = opt.Set(nextValue); err != nil {
+							return commandName, WrapInvalidValue(strconv.Quote(commandName), err)
+						}
 						valuesToProcess = nextValuesToProcess
 					} else {
 						break
@@ -305,13 +307,13 @@ func (registry Registry) Parse(values []string) (string, error) {
 			}
 		} else {
 			if err := commandConfig.Args.Set(value, true); err != nil {
-				return commandName, WrapLengthOverflow(strconv.Quote(commandName)+" unnamed args", err)
+				return commandName, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
 			}
 		}
 	}
 
 	if err = commandConfig.Args.CheckLen(); err != nil {
-		return commandName, WrapLengthOverflow(strconv.Quote(commandName)+" unnamed args", err)
+		return commandName, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
 	}
 
 	for _, opt := range commandConfig.Opts {

@@ -72,11 +72,11 @@ func TestStringArrayWithLimit(t *testing.T) {
 	require.ErrorIs(t, err, errIs)
 	require.Equal(t, sa, []string{"a"})
 
-	err = v.Replace([]string{"z"})
+	err = v.ResetWith([]string{"z"})
 	require.NoError(t, err)
 	require.Equal(t, sa, []string{"z"})
 
-	err = v.Replace([]string{"b", "cd"})
+	err = v.ResetWith([]string{"b", "cd"})
 	errIs = ErrorLengthOverflow{"length", ">", 1}
 	require.ErrorIs(t, errIs, err)
 	require.Equal(t, sa, []string{"z"})
@@ -84,7 +84,7 @@ func TestStringArrayWithLimit(t *testing.T) {
 	// check minimum
 	v.SetMinLen(1)
 
-	err = v.Replace([]string{})
+	err = v.ResetWith([]string{})
 	require.NoError(t, err)
 	require.Equal(t, sa, []string{})
 	err = v.CheckLen()

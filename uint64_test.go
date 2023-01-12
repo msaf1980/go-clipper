@@ -18,13 +18,13 @@ func TestUint64_0(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, uint64(0), n)
 
-	err = v.Set(strconv.FormatInt(math.MaxInt, 10), true)
+	err = v.Set(strconv.FormatInt(math.MaxInt64, 10), true)
 	require.NoError(t, err)
-	require.Equal(t, uint64(math.MaxInt), n)
+	require.Equal(t, uint64(math.MaxInt64), n)
 
-	err = v.Set(strconv.FormatInt(math.MinInt, 10), true)
+	err = v.Set(strconv.FormatInt(math.MinInt64, 10), true)
 	require.Error(t, err)
-	require.Equal(t, uint64(math.MaxInt), n)
+	require.Equal(t, uint64(math.MaxInt64), n)
 }
 
 func TestUint64_12(t *testing.T) {

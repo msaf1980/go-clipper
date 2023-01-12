@@ -12,7 +12,7 @@ func newUintValue(val uint, p *uint) *uintValue {
 }
 
 func (u *uintValue) Set(s string, _ bool) error {
-	v, err := strconv.ParseUint(s, 0, 64)
+	v, err := strconv.ParseUint(s, 0, 32)
 	if err == nil {
 		*u = uintValue(v)
 	}

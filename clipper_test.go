@@ -672,6 +672,90 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 
 /*----------------*/
 
+func TestRegistry_Parse_CustomTypes_Error(t *testing.T) {
+	var (
+		infoNum []int
+	)
+	store := make(map[string]map[string]interface{})
+	storeValues := make(map[string]map[string]*Opt)
+
+	store["info"] = make(map[string]interface{})
+	storeValues["info"] = make(map[string]*Opt)
+
+	// create a new registry
+	registry := NewRegistry()
+
+	// register the `info` sub-command
+	infoCommand, _ := registry.Register("info") // sub-command
+	store["info"]["num"] = &infoNum
+	storeValues["info"]["num"] = infoCommand.AddIntArray("num", "n", []int{}, &infoNum) // --num, -n | default value: []int
+
+	tests := []struct {
+		values   []string
+		want     string
+		wantVars map[string]interface{}
+		wantArgs []string
+		wantErr  string
+	}{
+		{
+			values: []string{"info", "-n", "1,0,2"},
+			want:   "info",
+			wantVars: map[string]interface{}{
+				"num": []int{1, 0, 2},
+			},
+		},
+		{
+			values:  []string{"info", "-n", "1,0,a"},
+			want:    "info",
+			wantErr: `parsing "a": invalid syntax`,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
+			registry.Reset()
+			got, err := registry.Parse(tt.values)
+			if err == nil && tt.wantErr != "" {
+				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
+				return
+			} else if err != nil {
+				if tt.wantErr == "" || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("Registry.Parse() error = %q, wantErr %q", err.Error(), tt.wantErr)
+					return
+				}
+			} else if got == tt.want {
+				gotV := registry[got]
+				for k, o := range gotV.Opts {
+					wantVar := tt.wantVars[k]
+					assert.Equal(t, wantVar, o.Value.Get(), k)
+					assert.Equal(t, o.Value.Get(), storeValues[got][k].Value.Get(), k)
+					switch v := store[got][k].(type) {
+					case *string:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]string:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *bool:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					default:
+						t.Fatalf("%T is unhandled", v)
+					}
+				}
+				a := store[got][""]
+				if len(tt.wantArgs) > 0 && a != nil && len(*(a.(*[]string))) > 0 {
+					assert.Equal(t, &tt.wantArgs, a, "args")
+				}
+			} else {
+				t.Errorf("Registry.Parse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+/*----------------*/
+
 // test unsupported flag
 func TestUnsupportedAssignment(t *testing.T) {
 
@@ -715,8 +799,9 @@ func TestEmptyRootCommand(t *testing.T) {
 			`    dir="/var/users"`,
 		}
 
+		out := string(output)
 		for _, line := range lines {
-			if !strings.Contains(fmt.Sprintf("%s", output), line) {
+			if !strings.Contains(out, line) {
 				t.Fatalf("got\n%q\nwant line\n%q", output, line)
 			}
 		}
@@ -737,8 +822,9 @@ func TestUnregisteredRootCommand(t *testing.T) {
 			`error => clipper.ErrorUnknownCommand{Name:""}`,
 		}
 
+		out := string(output)
 		for _, line := range lines {
-			if !strings.Contains(fmt.Sprintf("%s", output), line) {
+			if !strings.Contains(out, line) {
 				t.Fatalf("got\n%q\nwant line\n%q", output, line)
 			}
 		}
@@ -806,8 +892,8 @@ func TestValidInvertFlagValues(t *testing.T) {
 
 	// options list
 	optionsList := [][]string{
-		{"info", "-V", "-v", "--output", "./opt/dir", "--no-clean"},
-		{"info", "--version", "--no-clean", "--output", "./opt/dir", "--verbose"},
+		{"info", "-V", "1.0.1", "-v", "--output", "./opt/dir", "--no-clean"},
+		{"info", "--version=1.0.1", "--no-clean", "--output", "./opt/dir", "--verbose"},
 	}
 
 	for _, options := range optionsList {
@@ -822,13 +908,14 @@ func TestValidInvertFlagValues(t *testing.T) {
 				`sub-command => "info"`,
 				`  Dump variables`,
 				`    verbose="true"`,
-				`    version=""`,
+				`    version="1.0.1"`,
 				`    output="./opt/dir"`,
 				`    clean="false"`,
 			}
 
+			out := string(output)
 			for _, line := range lines {
-				if !strings.Contains(fmt.Sprintf("%s", output), line) {
+				if !strings.Contains(out, line) {
 					t.Fatalf("got\n%q\nwant line\n%q", output, line)
 				}
 			}
@@ -886,8 +973,9 @@ func TestFlagAssignmentSyntax(t *testing.T) {
 					`    args=[student,thatisuday]`,
 				}
 
+				out := string(output)
 				for _, line := range lines {
-					if !strings.Contains(fmt.Sprintf("%s", output), line) {
+					if !strings.Contains(out, line) {
 						t.Fatalf("got\n%q\nwant line\n%q", output, line)
 					}
 				}
@@ -921,8 +1009,9 @@ func TestValidVariadicArgumentValues(t *testing.T) {
 					`    args=[student]`,
 				}
 
+				out := string(output)
 				for _, line := range lines {
-					if !strings.Contains(fmt.Sprintf("%s", output), line) {
+					if !strings.Contains(out, line) {
 						t.Fatalf("got\n%q\nwant line\n%q", output, line)
 					}
 				}
@@ -962,8 +1051,9 @@ func TestRootCommandWithOptions(t *testing.T) {
 				`    args=[userinfo]`,
 			}
 
+			out := string(output)
 			for _, line := range lines {
-				if !strings.Contains(fmt.Sprintf("%s", output), line) {
+				if !strings.Contains(out, line) {
 					t.Fatalf("got\n%q\nwant line\n%q", output, line)
 				}
 			}
@@ -995,8 +1085,9 @@ func TestSubCommandWithOptions(t *testing.T) {
 				`    args=[student,manager]`,
 			}
 
+			out := string(output)
 			for _, line := range lines {
-				if !strings.Contains(fmt.Sprintf("%s", output), line) {
+				if !strings.Contains(out, line) {
 					t.Fatalf("got\n%q\nwant line\n%q", output, line)
 				}
 			}

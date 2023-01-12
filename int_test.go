@@ -18,13 +18,13 @@ func TestInt_0(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, -1, n)
 
-	err = v.Set(strconv.FormatInt(math.MaxInt, 10), true)
+	err = v.Set(strconv.FormatInt(math.MaxInt32, 10), true)
 	require.NoError(t, err)
-	require.Equal(t, int(math.MaxInt), n)
+	require.Equal(t, int(math.MaxInt32), n)
 
-	err = v.Set(strconv.FormatInt(math.MinInt, 10), true)
+	err = v.Set(strconv.FormatInt(math.MinInt32, 10), true)
 	require.NoError(t, err)
-	require.Equal(t, int(math.MinInt), n)
+	require.Equal(t, int(math.MinInt32), n)
 }
 
 func TestInt_12(t *testing.T) {

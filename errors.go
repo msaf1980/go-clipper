@@ -7,6 +7,8 @@ import (
 
 var (
 	ErrTypeMismatch = errors.New("type mismatch")
+	ErrIPParse      = errors.New("failed to parse IP")
+	ErrIPMaskParse  = errors.New("failed to parse IP mask")
 )
 
 // ErrorUnknownCommand represents an error when command-line arguments contain an unregistered command.
@@ -67,21 +69,23 @@ func (e ErrorLengthOverflow) Error() string {
 }
 
 // ErrorWrapped represents an wrapped error
-type ErrorWrapped struct {
+type ErrorInvalidValue struct {
 	Prefix string
 	err    error
 }
 
-func (e ErrorWrapped) Error() string {
+func (e ErrorInvalidValue) Error() string {
 	return e.Prefix + " " + e.err.Error()
 }
 
-func WrapLengthOverflow(prefix string, err error) error {
+func WrapInvalidValue(prefix string, err error) error {
 	switch v := err.(type) {
 	case ErrorLengthOverflow:
 		v.Name = prefix + " " + v.Name
 		return v
-	default:
+	case ErrorUnsupportedFlag:
 		return err
+	default:
+		return ErrorInvalidValue{prefix, err}
 	}
 }
