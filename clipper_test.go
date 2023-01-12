@@ -406,7 +406,7 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 	infoVersionDefault := ""
 	store["info"]["version"] = &infoVersion
 	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
-															SetValidValues([]string{"", "1.0.1", "2.0.0"})
+															SetValidValues([]string{"", "1.0.1", "2.0.0"}).SetRequired(true)
 	infoOutputDefault := "./"
 	store["info"]["output"] = &infoOutput
 	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
@@ -436,6 +436,23 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 			wantErr: `unknown command "rootarg" found`,
 		},
 		{
+			// version are required
+			values: []string{"info", "-V", "1.0.1", "-v"},
+			want:   "info",
+			wantVars: map[string]interface{}{
+				"clean":   true,
+				"verbose": true,
+				"version": "1.0.1",
+				"output":  "./",
+			},
+		},
+		{
+			// version are required
+			values:  []string{"info"},
+			want:    "info",
+			wantErr: `required flag "version" not found in the arguments`,
+		},
+		{
 			values:   []string{"ghost"},
 			want:     "ghost",
 			wantVars: map[string]interface{}{},
@@ -449,6 +466,173 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
+			got, err := registry.Parse(tt.values)
+			if err == nil && tt.wantErr != "" {
+				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
+				return
+			} else if err != nil {
+				if tt.wantErr == "" || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("Registry.Parse() error = %q, wantErr %q", err.Error(), tt.wantErr)
+					return
+				}
+			} else if got == tt.want {
+				gotV := registry[got]
+				for k, o := range gotV.Opts {
+					wantVar := tt.wantVars[k]
+					assert.Equal(t, wantVar, o.Value.Get(), k)
+					assert.Equal(t, o.Value.Get(), storeValues[got][k].Value.Get(), k)
+					switch v := store[got][k].(type) {
+					case *string:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *bool:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]string:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					default:
+						t.Fatalf("%T is unhandled", v)
+					}
+				}
+				a := store[got][""]
+				if len(tt.wantArgs) > 0 && a != nil && len(*(a.(*[]string))) > 0 {
+					assert.Equal(t, &tt.wantArgs, a, "args")
+				}
+			} else {
+				t.Errorf("Registry.Parse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+/*----------------*/
+
+func TestRegistry_Parse_Limits(t *testing.T) {
+	var (
+		rootForce, rootVerbose bool
+		rootVersion, rootDir   string
+		root                   []string
+
+		infoVerbose, infoNoClean bool
+		infoVersion, infoOutput  string
+
+		ghost []string
+	)
+	store := make(map[string]map[string]interface{})
+	storeValues := make(map[string]map[string]*Opt)
+
+	store[""] = make(map[string]interface{})
+	storeValues[""] = make(map[string]*Opt)
+
+	store["info"] = make(map[string]interface{})
+	storeValues["info"] = make(map[string]*Opt)
+
+	store["ghost"] = make(map[string]interface{})
+	storeValues["ghost"] = make(map[string]*Opt)
+
+	// create a new registry
+	registry := NewRegistry()
+
+	// register the root command
+	rootCommand, _ := registry.Register("") // root command
+	// rootCommand.AddArg("output", "")                    //
+	// rootForceDefault := false
+	store[""]["force"] = &rootForce
+	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce) // --force, -f | default value: "false"
+	// rootVerboseDefault := false
+	store[""]["verbose"] = &rootVerbose
+	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose) // --verbose, -v | default value: "false"
+	rootVersionDefault := ""
+	store[""]["version"] = &rootVersion
+	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion) // --version, -V | default value: ""
+	rootDirDefault := "/var/users"
+	store[""]["dir"] = &rootDir
+	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir) // --dir <value> | default value: "/var/users"
+	store[""][""] = &root
+	rootCommand.AddStringArgs(-1, &root)
+
+	// register the `info` sub-command
+	infoCommand, _ := registry.Register("info") // sub-command
+	// infoVerboseDefault := false
+	store["info"]["verbose"] = &infoVerbose
+	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose) // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
+	infoVersionDefault := ""
+	store["info"]["version"] = &infoVersion
+	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
+															SetValidValues([]string{"", "1.0.1", "2.0.0"})
+	infoOutputDefault := "./"
+	store["info"]["output"] = &infoOutput
+	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
+	// infoNoCleanDefault := true
+	store["info"]["clean"] = &infoNoClean
+	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean) // --no-clean | default value: "true"
+
+	// register the `ghost` sub-command
+	registry.Register("ghost")
+	store["ghost"][""] = &ghost
+	infoCommand.AddStringArgs(-1, &ghost)
+
+	tests := []struct {
+		values   []string
+		minArgs  int
+		maxArgs  int
+		want     string
+		wantVars map[string]interface{}
+		wantArgs []string
+		wantErr  string
+	}{
+		{
+			values:  []string{"-V", "1.0.1"},
+			maxArgs: 1,
+			want:    "",
+			wantVars: map[string]interface{}{
+				"force":   false,
+				"verbose": false,
+				"version": "1.0.1",
+				"dir":     "/var/users",
+			},
+		},
+		{
+			values:  []string{"rootarg", "-V", "1.0.1"},
+			minArgs: 1,
+			maxArgs: 1,
+			want:    "",
+			wantVars: map[string]interface{}{
+				"force":   false,
+				"verbose": false,
+				"version": "1.0.1",
+				"dir":     "/var/users",
+			},
+			wantArgs: []string{"rootarg"},
+		},
+		{
+			values:  []string{"rootarg", "-V", "1.0.1", "overflow"},
+			maxArgs: 1,
+			want:    "",
+			wantErr: `"" unnamed args length at argument=overflow > 1`,
+		},
+		{
+			values:  []string{"rootarg", "-V", "1.0.1"},
+			maxArgs: 2,
+			minArgs: 2,
+			want:    "",
+			wantErr: `"" unnamed args length < 2`,
+		},
+		{
+			values:  []string{"info", "no_args"},
+			want:    "info",
+			wantErr: `"info" unnamed args length at argument=no_args > 0`,
+		},
+		{
+			// no args are alloewd for None
+			values:  []string{"ghost", "test"},
+			want:    "ghost",
+			wantErr: `unsupported flag "test" found in the arguments`,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
+			registry.Reset()
+			registry[tt.want].Args.SetMinLen(tt.minArgs)
+			registry[tt.want].Args.SetMaxLen(tt.maxArgs)
 			got, err := registry.Parse(tt.values)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)

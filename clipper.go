@@ -26,6 +26,7 @@
 package clipper
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -303,19 +304,21 @@ func (registry Registry) Parse(values []string) (string, error) {
 				}
 			}
 		} else {
-			// process as argument
-
-			// if !varg.Validate(value) {
-			// 	return nil, ErrorUnsupportedValue{varg.Name, value}
-			// }
-
 			if err := commandConfig.Args.Set(value, true); err != nil {
-				return commandName, err
+				return commandName, WrapLengthOverflow(strconv.Quote(commandName)+" unnamed args", err)
 			}
 		}
 	}
 
-	_, _, _ = commandConfig, commandName, valuesToProcess
+	if err = commandConfig.Args.CheckLen(); err != nil {
+		return commandName, WrapLengthOverflow(strconv.Quote(commandName)+" unnamed args", err)
+	}
+
+	for _, opt := range commandConfig.Opts {
+		if opt.IsRequired && !opt.Changed {
+			return commandName, ErrorRequiredFlag{opt.Name}
+		}
+	}
 
 	return commandName, nil
 }

@@ -69,6 +69,7 @@ func (s *stringArrayValue) String() string {
 type stringArrayLValue struct {
 	stringArrayValue
 
+	min int
 	max int
 }
 
@@ -89,13 +90,26 @@ func (s *stringArrayLValue) MaxLen() int {
 	return s.max
 }
 
+func (s *stringArrayLValue) SetMinLen(min int) Arg {
+	s.min = min
+	return s
+}
+
+func (s *stringArrayLValue) MinLen() int {
+	return s.min
+}
+
+func (s *stringArrayLValue) CheckLen() error {
+	return CheckLen("length", len(*s.value), s.min, s.max)
+}
+
 func (s *stringArrayLValue) Set(val string, doAppend bool) error {
 	v, err := readAsCSV(val)
 	if err != nil {
 		return err
 	}
 	if s.max >= 0 && len(*s.value)+len(v) > s.max {
-		return ErrOverflow
+		return ErrorLengthOverflow{"length at argument=" + val, ">", s.max}
 	}
 	if doAppend {
 		*s.value = append(*s.value, v...)
@@ -107,7 +121,7 @@ func (s *stringArrayLValue) Set(val string, doAppend bool) error {
 
 func (s *stringArrayLValue) Replace(val []string) error {
 	if s.max >= 0 && len(val) > s.max {
-		return ErrOverflow
+		return ErrorLengthOverflow{"length", ">", s.max}
 	}
 	out := make([]string, len(val))
 	copy(out, val)

@@ -44,6 +44,7 @@ func main() {
 	listCommand, _ := registry.Register("list")                     // sub-command
 	listCommand.AddStringArray("dir", "d", []string{"a"}, &listDir) // --output, -o <value> | default value: "./"
 	listCommand.AddStringArgs(-1, &list)
+	// listCommand.Args.SetMinLen(1) // set minimal length (at parse step) | default value: 0
 
 	// register the `ghost` sub-command
 	registry.Register("ghost")
