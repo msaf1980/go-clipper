@@ -41,7 +41,7 @@ func (u *uint32Value) GetUint32() uint32 { return uint32(*u) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint32(name, shortName string, value uint32, p *uint32) *Opt {
+func (commandConfig *CommandConfig) AddUint32(name, shortName string, value uint32, p *uint32, help string) *Opt {
 	v := newUint32Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

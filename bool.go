@@ -37,9 +37,9 @@ func (b *boolValue) GetBool() bool { return bool(*b) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddBool(name, shortName string, value bool, b *bool) *Opt {
+func (commandConfig *CommandConfig) AddBool(name, shortName string, value bool, b *bool, help string) *Opt {
 	*b = value
 	v := newBoolValue(b)
-	o := commandConfig.AddValue(name, shortName, v)
+	o := commandConfig.AddValue(name, shortName, v, help)
 	return o
 }

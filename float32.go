@@ -38,7 +38,7 @@ func (f *float32Value) GetFloat32() float32 { return float32(*f) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddFloat32(name, shortName string, value float32, p *float32) *Opt {
+func (commandConfig *CommandConfig) AddFloat32(name, shortName string, value float32, p *float32, help string) *Opt {
 	v := newFloat32Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

@@ -41,7 +41,7 @@ func (u *uint64Value) GetUint64() uint64 { return uint64(*u) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint64(name, shortName string, value uint64, p *uint64) *Opt {
+func (commandConfig *CommandConfig) AddUint64(name, shortName string, value uint64, p *uint64, help string) *Opt {
 	v := newUint64Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

@@ -87,9 +87,9 @@ func (s *intArrayValue) String() string {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIntArray(name, shortName string, value []int, p *[]int) *Opt {
+func (commandConfig *CommandConfig) AddIntArray(name, shortName string, value []int, p *[]int, help string) *Opt {
 	v := newIntArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
 
 // AddIntArrayFromCSV registers an int argument configuration with the command.
@@ -97,7 +97,7 @@ func (commandConfig *CommandConfig) AddIntArray(name, shortName string, value []
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIntArrayFromCSV(name, shortName string, value string, p *[]int) *Opt {
+func (commandConfig *CommandConfig) AddIntArrayFromCSV(name, shortName string, value string, p *[]int, help string) *Opt {
 	v := newIntArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

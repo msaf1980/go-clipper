@@ -41,7 +41,7 @@ func (u *uint8Value) GetUint8() uint8 { return uint8(*u) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint8(name, shortName string, value uint8, p *uint8) *Opt {
+func (commandConfig *CommandConfig) AddUint8(name, shortName string, value uint8, p *uint8, help string) *Opt {
 	v := newUint8Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

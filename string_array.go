@@ -134,9 +134,9 @@ func (s *stringArrayLValue) ResetWith(val []string) error {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value []string, p *[]string) *Opt {
+func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value []string, p *[]string, help string) *Opt {
 	v := newStringArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
 
 // AddStringArrayFromCSV registers an string argument configuration with the command.
@@ -144,7 +144,7 @@ func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddStringArrayFromCSV(name, shortName string, value string, p *[]string) *Opt {
+func (commandConfig *CommandConfig) AddStringArrayFromCSV(name, shortName string, value string, p *[]string, help string) *Opt {
 	v := newStringArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

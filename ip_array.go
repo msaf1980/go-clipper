@@ -88,9 +88,9 @@ func (s *ipArrayValue) String() string {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIPArray(name, shortName string, value []net.IP, p *[]net.IP) *Opt {
+func (commandConfig *CommandConfig) AddIPArray(name, shortName string, value []net.IP, p *[]net.IP, help string) *Opt {
 	v := newIPArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
 
 // Addnet.IPArrayFromCSV registers an int argument configuration with the command.
@@ -98,7 +98,7 @@ func (commandConfig *CommandConfig) AddIPArray(name, shortName string, value []n
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIPArrayFromCSV(name, shortName string, value string, p *[]net.IP) *Opt {
+func (commandConfig *CommandConfig) AddIPArrayFromCSV(name, shortName string, value string, p *[]net.IP, help string) *Opt {
 	v := newIPArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

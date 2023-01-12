@@ -41,54 +41,54 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 	storeValues["list"] = make(map[string]*Opt)
 
 	// create a new registry
-	registry := NewRegistry()
+	registry := NewRegistry("")
 
 	// register the root command
-	rootCommand, _ := registry.Register("") // root command
+	rootCommand, _ := registry.Register("", "") // root command
 	// rootCommand.AddArg("output", "")                    //
 	// rootForceDefault := false
 	store[""]["force"] = &rootForce
-	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce) // --force, -f | default value: "false"
+	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce, "") // --force, -f | default value: "false"
 	// rootVerboseDefault := false
 	store[""]["verbose"] = &rootVerbose
-	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose) // --verbose, -v | default value: "false"
+	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose, "") // --verbose, -v | default value: "false"
 	rootVersionDefault := ""
 	store[""]["version"] = &rootVersion
-	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion) // --version, -V | default value: ""
+	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion, "") // --version, -V | default value: ""
 	rootDirDefault := "/var/users"
 	store[""]["dir"] = &rootDir
-	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir) // --dir <value> | default value: "/var/users"
+	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir, "") // --dir <value> | default value: "/var/users"
 	store[""][""] = &root
-	rootCommand.AddStringArgs(-1, &root)
+	rootCommand.AddStringArgs(-1, &root, "")
 
 	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info") // sub-command
+	infoCommand, _ := registry.Register("info", "") // sub-command
 	// infoVerboseDefault := false
 	store["info"]["verbose"] = &infoVerbose
-	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose) // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
+	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose, "") // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
 	infoVersionDefault := ""
 	store["info"]["version"] = &infoVersion
-	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
+	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion, ""). // --version, -V | default value: ""
 															SetValidValues([]string{"", "1.0.1", "2.0.0"})
 	infoOutputDefault := "./"
 	store["info"]["output"] = &infoOutput
-	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
+	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput, "") // --output, -o <value> | default value: "./"
 	// infoNoCleanDefault := true
 	store["info"]["clean"] = &infoNoClean
-	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean) // --no-clean | default value: "true"
+	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean, "") // --no-clean | default value: "true"
 
 	// register the `list` sub-command
-	listCommand, _ := registry.Register("list") // sub-command
+	listCommand, _ := registry.Register("list", "") // sub-command
 	store["list"]["verbose"] = &listVerbose
-	storeValues["list"]["verbose"] = listCommand.AddFlag("verbose", "v", &listVerbose) // --verbose, -v | default value: "false"
+	storeValues["list"]["verbose"] = listCommand.AddFlag("verbose", "v", &listVerbose, "") // --verbose, -v | default value: "false"
 	listDirDefault := []string{"a"}
 	store["list"]["dir"] = &listDir
-	storeValues["list"]["dir"] = listCommand.AddStringArray("dir", "d", listDirDefault, &listDir) // --output, -o <value> | default value: "./"
+	storeValues["list"]["dir"] = listCommand.AddStringArray("dir", "d", listDirDefault, &listDir, "") // --output, -o <value> | default value: "./"
 	store["list"][""] = &list
-	listCommand.AddStringArgs(-1, &list)
+	listCommand.AddStringArgs(-1, &list, "")
 
 	// register the `ghost` sub-command
-	registry.Register("ghost")
+	registry.Register("ghost", "")
 
 	tests := []struct {
 		values   []string
@@ -213,7 +213,7 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, err := registry.Parse(tt.values)
+			got, _, err := registry.Parse(tt.values, true)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -223,7 +223,7 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 					return
 				}
 			} else if got == tt.want {
-				gotV := registry[got]
+				gotV := registry.Commands[got]
 				for k, o := range gotV.Opts {
 					wantVar := tt.wantVars[k]
 					assert.Equal(t, wantVar, o.Value.Get(), k)
@@ -273,42 +273,42 @@ func TestRegistry_Parse_RootNoArgs(t *testing.T) {
 	storeValues["ghost"] = make(map[string]*Opt)
 
 	// create a new registry
-	registry := NewRegistry()
+	registry := NewRegistry("")
 
 	// register the root command
-	rootCommand, _ := registry.Register("") // root command
+	rootCommand, _ := registry.Register("", "") // root command
 	// rootCommand.AddArg("output", "")                    //
 	// rootForceDefault := false
 	store[""]["force"] = &rootForce
-	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce) // --force, -f | default value: "false"
+	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce, "") // --force, -f | default value: "false"
 	// rootVerboseDefault := false
 	store[""]["verbose"] = &rootVerbose
-	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose) // --verbose, -v | default value: "false"
+	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose, "") // --verbose, -v | default value: "false"
 	rootVersionDefault := ""
 	store[""]["version"] = &rootVersion
-	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion) // --version, -V | default value: ""
+	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion, "") // --version, -V | default value: ""
 	rootDirDefault := "/var/users"
 	store[""]["dir"] = &rootDir
-	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir) // --dir <value> | default value: "/var/users"
+	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir, "") // --dir <value> | default value: "/var/users"
 
 	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info") // sub-command
+	infoCommand, _ := registry.Register("info", "") // sub-command
 	// infoVerboseDefault := false
 	store["info"]["verbose"] = &infoVerbose
-	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose) // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
+	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose, "") // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
 	infoVersionDefault := ""
 	store["info"]["version"] = &infoVersion
-	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
+	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion, ""). // --version, -V | default value: ""
 															SetValidValues([]string{"", "1.0.1", "2.0.0"})
 	infoOutputDefault := "./"
 	store["info"]["output"] = &infoOutput
-	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
+	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput, "") // --output, -o <value> | default value: "./"
 	// infoNoCleanDefault := true
 	store["info"]["clean"] = &infoNoClean
-	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean) // --no-clean | default value: "true"
+	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean, "") // --no-clean | default value: "true"
 
 	// register the `ghost` sub-command
-	registry.Register("ghost")
+	registry.Register("ghost", "")
 
 	tests := []struct {
 		values   []string
@@ -342,7 +342,7 @@ func TestRegistry_Parse_RootNoArgs(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, err := registry.Parse(tt.values)
+			got, _, err := registry.Parse(tt.values, true)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -352,7 +352,7 @@ func TestRegistry_Parse_RootNoArgs(t *testing.T) {
 					return
 				}
 			} else if got == tt.want {
-				gotV := registry[got]
+				gotV := registry.Commands[got]
 				for k, o := range gotV.Opts {
 					wantVar := tt.wantVars[k]
 					assert.Equal(t, wantVar, o.Value.Get(), k)
@@ -396,26 +396,26 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 	storeValues["ghost"] = make(map[string]*Opt)
 
 	// create a new registry
-	registry := NewRegistry()
+	registry := NewRegistry("")
 
 	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info") // sub-command
+	infoCommand, _ := registry.Register("info", "") // sub-command
 	// infoVerboseDefault := false
 	store["info"]["verbose"] = &infoVerbose
-	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose) // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
+	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose, "") // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
 	infoVersionDefault := ""
 	store["info"]["version"] = &infoVersion
-	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
+	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion, ""). // --version, -V | default value: ""
 															SetValidValues([]string{"", "1.0.1", "2.0.0"}).SetRequired(true)
 	infoOutputDefault := "./"
 	store["info"]["output"] = &infoOutput
-	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
+	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput, "") // --output, -o <value> | default value: "./"
 	// infoNoCleanDefault := true
 	store["info"]["clean"] = &infoNoClean
-	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean) // --no-clean | default value: "true"
+	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean, "") // --no-clean | default value: "true"
 
 	// register the `ghost` sub-command
-	registry.Register("ghost")
+	registry.Register("ghost", "")
 
 	tests := []struct {
 		values   []string
@@ -466,7 +466,7 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, err := registry.Parse(tt.values)
+			got, _, err := registry.Parse(tt.values, true)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -476,7 +476,7 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 					return
 				}
 			} else if got == tt.want {
-				gotV := registry[got]
+				gotV := registry.Commands[got]
 				for k, o := range gotV.Opts {
 					wantVar := tt.wantVars[k]
 					assert.Equal(t, wantVar, o.Value.Get(), k)
@@ -529,46 +529,46 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 	storeValues["ghost"] = make(map[string]*Opt)
 
 	// create a new registry
-	registry := NewRegistry()
+	registry := NewRegistry("")
 
 	// register the root command
-	rootCommand, _ := registry.Register("") // root command
+	rootCommand, _ := registry.Register("", "") // root command
 	// rootCommand.AddArg("output", "")                    //
 	// rootForceDefault := false
 	store[""]["force"] = &rootForce
-	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce) // --force, -f | default value: "false"
+	storeValues[""]["force"] = rootCommand.AddFlag("force", "f", &rootForce, "") // --force, -f | default value: "false"
 	// rootVerboseDefault := false
 	store[""]["verbose"] = &rootVerbose
-	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose) // --verbose, -v | default value: "false"
+	storeValues[""]["verbose"] = rootCommand.AddFlag("verbose", "v", &rootVerbose, "") // --verbose, -v | default value: "false"
 	rootVersionDefault := ""
 	store[""]["version"] = &rootVersion
-	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion) // --version, -V | default value: ""
+	storeValues[""]["version"] = rootCommand.AddString("version", "V", rootVersionDefault, &rootVersion, "") // --version, -V | default value: ""
 	rootDirDefault := "/var/users"
 	store[""]["dir"] = &rootDir
-	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir) // --dir <value> | default value: "/var/users"
+	storeValues[""]["dir"] = rootCommand.AddString("dir", "d", rootDirDefault, &rootDir, "") // --dir <value> | default value: "/var/users"
 	store[""][""] = &root
-	rootCommand.AddStringArgs(-1, &root)
+	rootCommand.AddStringArgs(-1, &root, "")
 
 	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info") // sub-command
+	infoCommand, _ := registry.Register("info", "") // sub-command
 	// infoVerboseDefault := false
 	store["info"]["verbose"] = &infoVerbose
-	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose) // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
+	storeValues["info"]["verbose"] = infoCommand.AddFlag("verbose", "v", &infoVerbose, "") // --verbose, -v | default value: "false"                // --verbose, -v | default value: "false"
 	infoVersionDefault := ""
 	store["info"]["version"] = &infoVersion
-	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion). // --version, -V | default value: ""
+	storeValues["info"]["version"] = infoCommand.AddString("version", "V", infoVersionDefault, &infoVersion, ""). // --version, -V | default value: ""
 															SetValidValues([]string{"", "1.0.1", "2.0.0"})
 	infoOutputDefault := "./"
 	store["info"]["output"] = &infoOutput
-	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput) // --output, -o <value> | default value: "./"
+	storeValues["info"]["output"] = infoCommand.AddString("output", "o", infoOutputDefault, &infoOutput, "") // --output, -o <value> | default value: "./"
 	// infoNoCleanDefault := true
 	store["info"]["clean"] = &infoNoClean
-	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean) // --no-clean | default value: "true"
+	storeValues["info"]["clean"] = infoCommand.AddFlag("no-clean", "N", &infoNoClean, "") // --no-clean | default value: "true"
 
 	// register the `ghost` sub-command
-	registry.Register("ghost")
+	registry.Register("ghost", "")
 	store["ghost"][""] = &ghost
-	infoCommand.AddStringArgs(-1, &ghost)
+	infoCommand.AddStringArgs(-1, &ghost, "")
 
 	tests := []struct {
 		values   []string
@@ -631,9 +631,9 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			registry[tt.want].Args.SetMinLen(tt.minArgs)
-			registry[tt.want].Args.SetMaxLen(tt.maxArgs)
-			got, err := registry.Parse(tt.values)
+			registry.Commands[tt.want].Args.SetMinLen(tt.minArgs)
+			registry.Commands[tt.want].Args.SetMaxLen(tt.maxArgs)
+			got, _, err := registry.Parse(tt.values, true)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -643,7 +643,7 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 					return
 				}
 			} else if got == tt.want {
-				gotV := registry[got]
+				gotV := registry.Commands[got]
 				for k, o := range gotV.Opts {
 					wantVar := tt.wantVars[k]
 					assert.Equal(t, wantVar, o.Value.Get(), k)
@@ -683,12 +683,12 @@ func TestRegistry_Parse_CustomTypes_Error(t *testing.T) {
 	storeValues["info"] = make(map[string]*Opt)
 
 	// create a new registry
-	registry := NewRegistry()
+	registry := NewRegistry("")
 
 	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info") // sub-command
+	infoCommand, _ := registry.Register("info", "") // sub-command
 	store["info"]["num"] = &infoNum
-	storeValues["info"]["num"] = infoCommand.AddIntArray("num", "n", []int{}, &infoNum) // --num, -n | default value: []int
+	storeValues["info"]["num"] = infoCommand.AddIntArray("num", "n", []int{}, &infoNum, "") // --num, -n | default value: []int
 
 	tests := []struct {
 		values   []string
@@ -713,7 +713,7 @@ func TestRegistry_Parse_CustomTypes_Error(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, err := registry.Parse(tt.values)
+			got, _, err := registry.Parse(tt.values, true)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -723,7 +723,7 @@ func TestRegistry_Parse_CustomTypes_Error(t *testing.T) {
 					return
 				}
 			} else if got == tt.want {
-				gotV := registry[got]
+				gotV := registry.Commands[got]
 				for k, o := range gotV.Opts {
 					wantVar := tt.wantVars[k]
 					assert.Equal(t, wantVar, o.Value.Get(), k)
@@ -769,13 +769,13 @@ func TestUnsupportedAssignment(t *testing.T) {
 	for flag, options := range options {
 		t.Run(flag, func(t *testing.T) {
 			// command
-			r := NewRegistry()
-			rootCmd, _ := r.Register("")
+			r := NewRegistry("")
+			rootCmd, _ := r.Register("", "")
 
 			var version string
-			rootCmd.AddString("version", "v", "", &version)
+			rootCmd.AddString("version", "v", "", &version, "")
 
-			_, err := r.Parse(options)
+			_, _, err := r.Parse(options, true)
 			require.Error(t, err)
 		})
 	}

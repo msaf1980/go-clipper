@@ -41,7 +41,7 @@ func (i *int32Value) Getint32() int32 { return int32(*i) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddInt32(name, shortName string, value int32, p *int32) *Opt {
+func (commandConfig *CommandConfig) AddInt32(name, shortName string, value int32, p *int32, help string) *Opt {
 	v := newint32Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
