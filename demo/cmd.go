@@ -36,8 +36,9 @@ func main() {
 	// register the `info` sub-command
 	infoCommand, _ := registry.Register("info")              // sub-command
 	infoCommand.AddFlag("verbose", "v", &infoVerbose)        // --verbose, -v | default value: "false"
-	infoCommand.AddString("version", "V", "", &infoVersion). // --version, -V | default value: "false"
-									SetValidValues([]string{"", "1.0.1", "2.0.0"})
+	infoCommand.AddString("version", "V", "", &infoVersion). // --version, -V | default value: ""
+									SetValidValues([]string{"", "1.0.1", "2.0.0"}). // valid versions
+									SetRequired(true)                               // version are required
 	infoCommand.AddString("output", "o", "./", &infoOutput) // --output, -o <value> | default value: "./"
 	infoCommand.AddFlag("no-clean", "N", &infoNoClean)      // --no-clean | default value: "true"
 
