@@ -41,7 +41,7 @@ func (i *intValue) GetInt() int { return int(*i) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddInt(name, shortName string, value int, p *int) *Opt {
+func (commandConfig *CommandConfig) AddInt(name, shortName string, value int, p *int, help string) *Opt {
 	v := newIntValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

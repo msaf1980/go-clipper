@@ -47,7 +47,7 @@ func (t *timeValue) GetTime() time.Time { return *t.value }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddTime(name, shortName string, value time.Time, p *time.Time, layout string) *Opt {
+func (commandConfig *CommandConfig) AddTime(name, shortName string, value time.Time, p *time.Time, layout string, help string) *Opt {
 	v := newTimeValue(value, p, layout)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

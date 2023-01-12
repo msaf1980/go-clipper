@@ -26,6 +26,7 @@
 package clipper
 
 import (
+	"os"
 	"strconv"
 	"strings"
 )
@@ -55,6 +56,16 @@ func formatCommandValues(values []string) (formatted []string) {
 	}
 
 	return
+}
+
+// format command-line argument values
+func hasHelpFlag(values []string) bool {
+	for _, value := range values {
+		if value == "-h" || value == "--help" {
+			return true
+		}
+	}
+	return false
 }
 
 // check if value is a short flag
@@ -116,14 +127,14 @@ func isVariadicArgument(value string) (bool, string) {
 }
 
 // check if values corresponds to the root command and return command
-func getCommand(values []string, registry Registry) (commandName string, valuesToProcess []string,
+func getCommand(values []string, registry *Registry) (commandName string, valuesToProcess []string,
 	commandConfig *CommandConfig, err error) {
 
 	// TRUE: if all `values` are empty or the first `value` is a flag
 	var ok bool
 	if len(values) == 0 || isFlag(values[0]) {
 		// root coomand is empty
-		commandConfig, ok = registry[commandName]
+		commandConfig, ok = registry.Commands[commandName]
 		if !ok {
 			err = ErrorUnknownCommand{commandName}
 		}
@@ -132,11 +143,11 @@ func getCommand(values []string, registry Registry) (commandName string, valuesT
 		// get `CommandConfig` object from the registry
 		// if command is not registered, return `ErrorUnknownCommand` error
 		commandName, valuesToProcess = nextValue(values)
-		commandConfig, ok = registry[commandName]
+		commandConfig, ok = registry.Commands[commandName]
 		if !ok {
 			commandName = ""
 			valuesToProcess = values
-			commandConfig, ok = registry[commandName]
+			commandConfig, ok = registry.Commands[commandName]
 			if !ok {
 				if len(values) == 0 || isFlag(values[0]) {
 					err = ErrorUnknownCommand{commandName}
@@ -177,40 +188,52 @@ func removeWhitespaces(value string) string {
 /***********************************************/
 
 // Registry holds the configuration of the registered commands.
-type Registry map[string]*CommandConfig
+type Registry struct {
+	Commands    map[string]*CommandConfig
+	Description string // help message
+}
+
+// NewRegistry returns new instance of the "Registry"
+func NewRegistry(description string) *Registry {
+	return &Registry{
+		Commands:    make(map[string]*CommandConfig),
+		Description: description,
+	}
+}
 
 // Register method registers a command.
 // The "name" argument should be a simple string.
 // If "name" is an empty string, it is considered as a root command.
 // If a command is already registered, the registered `*CommandConfig` object is returned.
 // If the command is already registered, second return value will be `true`.
-func (registry Registry) Register(name string) (*CommandConfig, bool) {
+func (registry *Registry) Register(name string, help string) (*CommandConfig, bool) {
 
 	// remove all whitespaces
 	commandName := removeWhitespaces(name)
 
 	// check if command is already registered, if found, return existing entry
-	if _commandConfig, ok := registry[commandName]; ok {
+	if _commandConfig, ok := registry.Commands[commandName]; ok {
 		return _commandConfig, true
 	}
 
 	// construct new `CommandConfig` object
 	commandConfig := &CommandConfig{
 		Name:  commandName,
+		Help:  help,
 		Opts:  make(map[string]*Opt),
 		short: make(map[string]string),
 		Args:  None{}, // by default disable unnamed args
 	}
 
 	// add entry to the registry
-	registry[commandName] = commandConfig
+	registry.Commands[commandName] = commandConfig
 
 	return commandConfig, false
 }
 
 // Reset method reset values to it's default values.
-func (registry Registry) Reset() {
-	for _, cmd := range registry {
+func (registry *Registry) Reset() {
+	for _, cmd := range registry.Commands {
 		for _, opt := range cmd.Opts {
 			opt.Reset()
 		}
@@ -221,20 +244,28 @@ func (registry Registry) Reset() {
 // Parse method parses command-line arguments and returns an appropriate "*CommandConfig" object registered in the registry.
 // If command is not registered, it return `ErrorUnknownCommand` error.
 // If there is an error parsing a flag, it can return an `ErrorUnknownFlag` or `ErrorUnsupportedFlag` error.
-func (registry Registry) Parse(values []string) (string, error) {
+func (registry *Registry) Parse(values []string, exitOnHelp bool) (commandName string, helpWanted bool, err error) {
 
 	commandName, valuesToProcess, commandConfig, err := getCommand(values, registry)
 	if err != nil {
-		return commandName, err
+		return commandName, false, err
 	}
 
 	// format command-line argument values to process
 	valuesToProcess = formatCommandValues(valuesToProcess)
 
+	if hasHelpFlag(valuesToProcess) {
+		PrintHelp(registry, commandName, commandConfig)
+		if exitOnHelp {
+			os.Exit(0)
+		}
+		return commandName, true, nil
+	}
+
 	// check for invalid flag structure
 	for _, val := range valuesToProcess {
 		if isFlag(val) && isUnsupportedFlag(val) {
-			return commandName, ErrorUnsupportedFlag{val}
+			return commandName, false, ErrorUnsupportedFlag{val}
 		}
 	}
 
@@ -265,19 +296,19 @@ func (registry Registry) Parse(values []string) (string, error) {
 				// get long flag name
 				flagName, ok := commandConfig.short[name]
 				if !ok {
-					return commandName, ErrorUnknownFlag{value}
+					return commandName, false, ErrorUnknownFlag{value}
 				}
 
 				if opt, ok = commandConfig.Opts[flagName]; !ok {
-					return commandName, ErrorUnknownFlag{value}
+					return commandName, false, ErrorUnknownFlag{value}
 				}
 			} else if ok, name := isLongFlag(value); ok {
 				isInverted, name = isInvertedFlag(name)
 				if opt, ok = commandConfig.Opts[name]; !ok {
-					return commandName, ErrorUnknownFlag{value}
+					return commandName, false, ErrorUnknownFlag{value}
 				}
 			} else {
-				return commandName, ErrorUnknownFlag{value}
+				return commandName, false, ErrorUnknownFlag{value}
 			}
 
 			// set flag value
@@ -291,10 +322,10 @@ func (registry Registry) Parse(values []string) (string, error) {
 				for {
 					if nextValue, nextValuesToProcess := nextValue(valuesToProcess); len(nextValue) != 0 && !isFlag(nextValue) {
 						if !opt.Validate(nextValue) {
-							return commandName, ErrorUnsupportedValue{opt.Name, nextValue}
+							return commandName, false, ErrorUnsupportedValue{opt.Name, nextValue}
 						}
 						if err = opt.Set(nextValue); err != nil {
-							return commandName, WrapInvalidValue(strconv.Quote(commandName), err)
+							return commandName, false, WrapInvalidValue(strconv.Quote(commandName), err)
 						}
 						valuesToProcess = nextValuesToProcess
 					} else {
@@ -307,27 +338,22 @@ func (registry Registry) Parse(values []string) (string, error) {
 			}
 		} else {
 			if err := commandConfig.Args.Set(value, true); err != nil {
-				return commandName, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
+				return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
 			}
 		}
 	}
 
 	if err = commandConfig.Args.CheckLen(); err != nil {
-		return commandName, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
+		return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
 	}
 
 	for _, opt := range commandConfig.Opts {
 		if opt.IsRequired && !opt.Changed {
-			return commandName, ErrorRequiredFlag{opt.Name}
+			return commandName, false, ErrorRequiredFlag{opt.Name}
 		}
 	}
 
-	return commandName, nil
-}
-
-// NewRegistry returns new instance of the "Registry"
-func NewRegistry() Registry {
-	return make(Registry)
+	return commandName, false, nil
 }
 
 /*---------------------*/
@@ -337,6 +363,8 @@ type CommandConfig struct {
 
 	// name of the sub-command ("" for the root command)
 	Name string
+
+	Help string // help message for command
 
 	// named command-line options order (for display help)
 	OptsOrder []string
@@ -349,13 +377,16 @@ type CommandConfig struct {
 
 	// Unnamed args
 	Args Arg
+	// help message for command unnamed arguments
+	ArgsHelp string
 }
 
 // AddStringArgs set unnamed argument configuration with the command.
 // The `max` argument represents maximum length of unnamed args (-1 - unlimited).
 // `Arg` object returned.
-func (commandConfig *CommandConfig) AddStringArgs(max int, p *[]string) Arg {
+func (commandConfig *CommandConfig) AddStringArgs(max int, p *[]string, help string) Arg {
 	commandConfig.Args = newStringArrayLValue([]string{}, p, max)
+	commandConfig.ArgsHelp = help
 	return commandConfig.Args
 }
 
@@ -363,6 +394,7 @@ func (commandConfig *CommandConfig) AddStringArgs(max int, p *[]string) Arg {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) DisableArgs() Arg {
 	commandConfig.Args = None{}
+	commandConfig.ArgsHelp = ""
 	return commandConfig.Args
 }
 
@@ -371,7 +403,7 @@ func (commandConfig *CommandConfig) DisableArgs() Arg {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value) *Opt {
+func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, help string) *Opt {
 
 	// clean argument values
 	name = removeWhitespaces(name)
@@ -402,6 +434,7 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value) *O
 		Name:      name,
 		ShortName: shortName,
 		Value:     v,
+		Help:      help,
 	}
 
 	// register argument with the command-config
@@ -427,10 +460,10 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value) *O
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool) *Opt {
+func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool, help string) *Opt {
 	*b, name = isInvertedFlag(name)
 	v := newBoolValue(b)
-	o := commandConfig.AddValue(name, shortName, v)
+	o := commandConfig.AddValue(name, shortName, v, help)
 	o.IsBool = true
 	o.IsInverted = *b
 	return o
@@ -442,7 +475,7 @@ func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool) *Op
 type Opt struct {
 	Name       string // long name of the flag
 	ShortName  string // short name of the flag
-	Usage      string // help message
+	Help       string // help message
 	IsBool     bool   // boolean flag
 	IsInverted bool   // inverted boolean flag
 	// IsVariadic   bool   // true if can take multiple values
@@ -515,7 +548,7 @@ func (o *Opt) Validate(s string) (isValid bool) {
 // SetUsage enable/disable required
 // `*Opt` object returned.
 func (o *Opt) SetUsage(usage string) *Opt {
-	o.Usage = usage
+	o.Help = usage
 	return o
 }
 

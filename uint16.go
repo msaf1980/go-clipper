@@ -41,7 +41,7 @@ func (u *uint16Value) GetUint16() uint16 { return uint16(*u) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint16(name, shortName string, value uint16, p *uint16) *Opt {
+func (commandConfig *CommandConfig) AddUint16(name, shortName string, value uint16, p *uint16, help string) *Opt {
 	v := newUint16Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

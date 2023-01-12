@@ -39,7 +39,7 @@ func (s *stringValue) String() string { return s.GetString() }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddString(name, shortName string, value string, p *string) *Opt {
+func (commandConfig *CommandConfig) AddString(name, shortName string, value string, p *string, help string) *Opt {
 	v := newStringValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

@@ -63,9 +63,9 @@ func (i *ipValue) Type() string {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, p *net.IP) *Opt {
+func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, p *net.IP, help string) *Opt {
 	v := newIPValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
 
 // AddIPFromString registers an int argument configuration with the command.
@@ -73,7 +73,7 @@ func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, 
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddIPFromString(name, shortName string, value string, p *net.IP) *Opt {
+func (commandConfig *CommandConfig) AddIPFromString(name, shortName string, value string, p *net.IP, help string) *Opt {
 	v := newIPValueFromString(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

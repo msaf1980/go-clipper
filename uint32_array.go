@@ -87,9 +87,9 @@ func (s *uint32ArrayValue) String() string {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint32Array(name, shortName string, value []uint32, p *[]uint32) *Opt {
+func (commandConfig *CommandConfig) AddUint32Array(name, shortName string, value []uint32, p *[]uint32, help string) *Opt {
 	v := newUint32ArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
 
 // AddUint32ArrayFromCSV registers an int argument configuration with the command.
@@ -97,7 +97,7 @@ func (commandConfig *CommandConfig) AddUint32Array(name, shortName string, value
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint32ArrayFromCSV(name, shortName string, value string, p *[]uint32) *Opt {
+func (commandConfig *CommandConfig) AddUint32ArrayFromCSV(name, shortName string, value string, p *[]uint32, help string) *Opt {
 	v := newUint32ArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

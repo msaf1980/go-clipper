@@ -40,7 +40,7 @@ func (u *uintValue) GetUint() uint { return uint(*u) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUint(name, shortName string, value uint, p *uint) *Opt {
+func (commandConfig *CommandConfig) AddUint(name, shortName string, value uint, p *uint, help string) *Opt {
 	v := newUintValue(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }

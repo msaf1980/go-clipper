@@ -40,7 +40,7 @@ func (f *float64Value) GetFloat64() float64 { return float64(*f) }
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddFloat64(name, shortName string, value float64, p *float64) *Opt {
+func (commandConfig *CommandConfig) AddFloat64(name, shortName string, value float64, p *float64, help string) *Opt {
 	v := newFloat64Value(value, p)
-	return commandConfig.AddValue(name, shortName, v)
+	return commandConfig.AddValue(name, shortName, v, help)
 }
