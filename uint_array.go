@@ -97,7 +97,7 @@ func (commandConfig *CommandConfig) AddUintArray(name, shortName string, value [
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddUintArrayFromCSV(name, shortName string, value []uint, p *[]uint) *Opt {
-	v := newUintArrayValue(value, p)
+func (commandConfig *CommandConfig) AddUintArrayFromCSV(name, shortName string, value string, p *[]uint) *Opt {
+	v := newUintArrayValueFromCSV(value, p)
 	return commandConfig.AddValue(name, shortName, v)
 }

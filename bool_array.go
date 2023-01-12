@@ -97,7 +97,7 @@ func (commandConfig *CommandConfig) AddBoolArray(name, shortName string, value [
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddBoolArrayFromCSV(name, shortName string, value []bool, p *[]bool) *Opt {
-	v := newBoolArrayValue(value, p)
+func (commandConfig *CommandConfig) AddBoolArrayFromCSV(name, shortName string, value string, p *[]bool) *Opt {
+	v := newboolArrayValueFromCSV(value, p)
 	return commandConfig.AddValue(name, shortName, v)
 }

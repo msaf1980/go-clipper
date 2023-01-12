@@ -67,3 +67,13 @@ func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, 
 	v := newIPValue(value, p)
 	return commandConfig.AddValue(name, shortName, v)
 }
+
+// AddIPFromString registers an int argument configuration with the command.
+// The `name` argument represents the name of the argument.
+// The `shortName` argument represents the short alias of the argument.
+// If an argument with given `name` is already registered, then panic
+// registered `*Opt` object returned.
+func (commandConfig *CommandConfig) AddIPFromString(name, shortName string, value string, p *net.IP) *Opt {
+	v := newIPValueFromString(value, p)
+	return commandConfig.AddValue(name, shortName, v)
+}
