@@ -40,7 +40,7 @@ func main() {
 		infoVersion, infoOutput  string
 
 		list, listDir []string
-        listVerbose []bool
+        	listVerbose []bool
 	)
 
 	// create a new registry
@@ -69,7 +69,7 @@ func main() {
 	listCommand, _ := registry.Register("list", "list help")                     // sub-command
 	listCommand.AddStringArray("dir", "d", []string{"a"}, &listDir, "flag help") // --output, -o <value> | default value: "./"
 	listCommand.AddStringArgs(-1, &list, "args help")
-    listCommand.AddMultiFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: []
+    	listCommand.AddMultiFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: []
 
 	// register the `ghost` sub-command
 	registry.Register("ghost", "ghost help")
@@ -79,12 +79,12 @@ func main() {
 	// parse command-line arguments
 	command, _, err := registry.Parse(os.Args[1:], true)
 
-    // For interactive use (don't exit after help print, check helpRequested and break command execution if set)
-    // command, helpRequested, err := registry.Parse(os.Args[1:], false)
-    // if !helpRequested {
-    // // execute command
-    //     ..
-    // }
+   	// For interactive use (don't exit after help print, check helpRequested and break command execution if set)
+    	// command, helpRequested, err := registry.Parse(os.Args[1:], false)
+    	// if !helpRequested {
+    	// // execute command
+    	//     ..
+    	// }
 
 	/*----------------*/
 
@@ -188,7 +188,7 @@ When an **unnamed args (not allowed)** is provided in the command-line arguments
 $ go run demo/cmd.go info student -V -v --output ./opt/dir
 
 error => clipper.ErrorUnsupportedFlag{Name:"student"}
-```
+```https://github.com/msaf1980/go-clipper/blob/master/value.go#L11
 
 #### Example 7
 When a command is executed with an **inverted** flag (flag that starts with `--no-` prefix).
