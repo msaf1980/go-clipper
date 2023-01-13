@@ -65,10 +65,20 @@ func formatCommandValues(values []string) (formatted []string) {
 	return
 }
 
-// format command-line argument values
+// check for help flag
 func hasHelpFlag(values []string) bool {
 	for _, value := range values {
 		if value == "-h" || value == "--help" {
+			return true
+		}
+	}
+	return false
+}
+
+// check for flag
+func hasFlag(values []string, longFlag, shortFlag string) bool {
+	for _, value := range values {
+		if value == "--"+longFlag || (shortFlag != "" && value == shortFlag) {
 			return true
 		}
 	}
@@ -248,10 +258,30 @@ func (registry *Registry) Reset() {
 	}
 }
 
-// Parse method parses command-line arguments and returns an appropriate "*CommandConfig" object registered in the registry.
+// Parse method parses command-line arguments and returns an appropriate command name, registered in the registry.
+// If -h or --help flag found, program will be exited with code 0.
 // If command is not registered, it return `ErrorUnknownCommand` error.
 // If there is an error parsing a flag, it can return an `ErrorUnknownFlag` or `ErrorUnsupportedFlag` error.
-func (registry *Registry) Parse(values []string, exitOnHelp bool) (commandName string, helpWanted bool, err error) {
+func (registry *Registry) Parse(values []string) (commandName string, err error) {
+	commandName, _, err = registry.ParseOpt(values, true, false)
+	return
+}
+
+// ParseInteract method parses command-line arguments and returns an appropriate command name, registered in the registry.
+// If -h or --help flag found, return helpExit with `true` value`.
+// The `dryRun` argument set test mode (no value changed).
+// If command is not registered, it return `ErrorUnknownCommand` error.
+// If there is an error parsing a flag, it can return an `ErrorUnknownFlag` or `ErrorUnsupportedFlag` error.
+func (registry *Registry) ParseInteract(values []string, dryRun bool) (commandName string, helpExit bool, err error) {
+	return registry.ParseOpt(values, false, dryRun)
+}
+
+// ParseOpt method parses command-line arguments and returns an appropriate command name, registered in the registry.
+// The `helpExit` argument set interactive mode (if -h or --help flag found, return helpExit with `true` value`).
+// The `dryRun` argument set test mode (no value changed).
+// If command is not registered, it return `ErrorUnknownCommand` error.
+// If there is an error parsing a flag, it can return an `ErrorUnknownFlag` or `ErrorUnsupportedFlag` error.
+func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool) (commandName string, helpExit bool, err error) {
 
 	commandName, valuesToProcess, commandConfig, err := getCommand(values, registry)
 	if err != nil {
@@ -267,6 +297,17 @@ func (registry *Registry) Parse(values []string, exitOnHelp bool) (commandName s
 			os.Exit(0)
 		}
 		return commandName, true, nil
+	}
+
+	if commandConfig.version != nil {
+		// check for version callback request
+		if hasFlag(valuesToProcess, commandConfig.version.name, commandConfig.version.shortName) {
+			commandConfig.version.print()
+			if exitOnHelp {
+				os.Exit(0)
+			}
+			return commandName, true, nil
+		}
 	}
 
 	// check for invalid flag structure
@@ -375,7 +416,8 @@ type CommandConfig struct {
 	// name of the sub-command ("" for the root command)
 	Name string
 
-	Help string // help message for command
+	Help    string         // help message for command
+	version *versionHelper // version callback object
 
 	// named command-line options order (for display help)
 	OptsOrder []string

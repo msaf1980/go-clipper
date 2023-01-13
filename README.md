@@ -29,18 +29,22 @@ import (
 	"github.com/msaf1980/go-clipper"
 )
 
+var (
+	VERSION = "0.0.1"
+)
+
 func main() {
 
 	var (
 		rootForce, rootVerbose bool
-		rootVersion, rootDir   string
+		rootDir   string
 		root                   []string
 
 		infoVerbose, infoNoClean bool
 		infoVersion, infoOutput  string
 
 		list, listDir []string
-        	listVerbose []bool
+		listVerbose []bool
 	)
 
 	// create a new registry
@@ -52,9 +56,9 @@ func main() {
 		// rootCommand.AddArg("output", "")                    //
 		rootCommand.AddFlag("force", "f", &rootForce, "flag help")             // --force, -f | default value: "false"
 		rootCommand.AddFlag("verbose", "v", &rootVerbose, "flag help")         // --verbose, -v | default value: "false"
-		rootCommand.AddString("version", "V", "", &rootVersion, "flag help")   // --version, -V | default value: ""
 		rootCommand.AddString("dir", "d", "/var/users", &rootDir, "flag help") // --dir <value> | default value: "/var/users"
-		rootCommand.AddStringArgs(-1, &root, "args help")
+		rootCommand.AddStringArgs(-1, &root, "args help") // root unnamed args
+        rootCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 	}
 
 	// register the `info` sub-command
@@ -69,22 +73,23 @@ func main() {
 	listCommand, _ := registry.Register("list", "list help")                     // sub-command
 	listCommand.AddStringArray("dir", "d", []string{"a"}, &listDir, "flag help") // --output, -o <value> | default value: "./"
 	listCommand.AddStringArgs(-1, &list, "args help")
-    	listCommand.AddMultiFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: []
+	listCommand.AddMultiFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: []
 
 	// register the `ghost` sub-command
-	registry.Register("ghost", "ghost help")
+	ghostCommand, _ := registry.Register("ghost", "ghost help")
+	ghostCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 
 	/*----------------*/
 
 	// parse command-line arguments
-	command, _, err := registry.Parse(os.Args[1:], true)
+	command, err := registry.Parse(os.Args[1:], true)
 
    	// For interactive use (don't exit after help print, check helpRequested and break command execution if set)
-    	// command, helpRequested, err := registry.Parse(os.Args[1:], false)
-    	// if !helpRequested {
-    	// // execute command
-    	//     ..
-    	// }
+   	// command, helpRequested, err := registry.ParseInteract(os.Args[1:], false)
+   	// if !helpRequested {
+   	// // execute command
+   	//     ..
+   	// }
 
 	/*----------------*/
 

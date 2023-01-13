@@ -275,7 +275,7 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, _, err := registry.Parse(tt.values, true)
+			got, err := registry.Parse(tt.values)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -414,7 +414,7 @@ func TestRegistry_Parse_RootNoArgs(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, _, err := registry.Parse(tt.values, true)
+			got, err := registry.Parse(tt.values)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -544,7 +544,7 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
 			registry.Reset()
-			got, _, err := registry.Parse(tt.values, true)
+			got, err := registry.Parse(tt.values)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -717,7 +717,7 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 			registry.Reset()
 			registry.Commands[tt.want].Args.SetMinLen(tt.minArgs)
 			registry.Commands[tt.want].Args.SetMaxLen(tt.maxArgs)
-			got, _, err := registry.Parse(tt.values, true)
+			got, err := registry.Parse(tt.values)
 			if err == nil && tt.wantErr != "" {
 				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
 				return
@@ -775,7 +775,7 @@ func TestUnsupportedAssignment(t *testing.T) {
 			var version string
 			rootCmd.AddString("version", "v", "", &version, "")
 
-			_, _, err := r.Parse(options, true)
+			_, err := r.Parse(options)
 			require.Error(t, err)
 		})
 	}
@@ -795,7 +795,6 @@ func TestEmptyRootCommand(t *testing.T) {
 			`  Dump variables`,
 			`    force="false"`,
 			`    verbose="false"`,
-			`    version=""`,
 			`    dir="/var/users"`,
 		}
 
@@ -836,9 +835,9 @@ func TestUnregisteredFlag(t *testing.T) {
 
 	// flags
 	flags := map[string][]string{
-		"--forc":      {"-V", "1.0.1", "-v", "--forc", "-d", "./sub/dir"},
-		"--m":         {"-V", "1.0.1", "-v", "--force", "--m", "./sub/dir"},
-		"--directory": {"-V", "1.0.1", "-v", "--force", "--directory", "./sub/dir"},
+		"--forc":      {"-v", "--forc", "-d", "./sub/dir"},
+		"--m":         {"-v", "--force", "--m", "./sub/dir"},
+		"--directory": {"-v", "--force", "--directory", "./sub/dir"},
 	}
 
 	for flag, options := range flags {
@@ -891,7 +890,7 @@ func TestMultiFlag(t *testing.T) {
 
 	// flags
 	flags := map[string][]string{
-		"-i": {"-V", "1.0.1", "-v", "-dir", "-d", "./sub/dir"},
+		"-i": {"-v", "-dir", "-d", "./sub/dir"},
 	}
 
 	for flag, options := range flags {
@@ -1053,10 +1052,10 @@ func TestRootCommandWithOptions(t *testing.T) {
 
 	// options list
 	optionsList := [][]string{
-		{"userinfo", "-V", "1.0.1", "-v", "--force", "--dir", "./sub/dir"},
-		{"-V", "1.0.1", "--verbose", "--force", "userinfo", "--dir", "./sub/dir"},
-		{"-V", "1.0.1", "-v", "--force", "--dir", "./sub/dir", "userinfo"},
-		{"--version", "1.0.1", "--verbose", "--force", "--dir", "./sub/dir", "userinfo"},
+		{"userinfo", "-v", "--force", "--dir", "./sub/dir"},
+		{"--verbose", "--force", "userinfo", "--dir", "./sub/dir"},
+		{"-v", "--force", "--dir", "./sub/dir", "userinfo"},
+		{"--verbose", "--force", "--dir", "./sub/dir", "userinfo"},
 	}
 
 	for _, options := range optionsList {
@@ -1072,7 +1071,6 @@ func TestRootCommandWithOptions(t *testing.T) {
 				`  Dump variables`,
 				`    force="true"`,
 				`    verbose="true"`,
-				`    version="1.0.1"`,
 				`    dir="./sub/dir"`,
 				`    args=[userinfo]`,
 			}

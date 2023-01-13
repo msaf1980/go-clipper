@@ -7,10 +7,14 @@ import (
 	"github.com/msaf1980/go-clipper"
 )
 
+var (
+	VERSION = "0.0.1"
+)
+
 func main() {
 	var (
 		rootForce, rootVerbose bool
-		rootVersion, rootDir   string
+		rootDir                string
 		root                   []string
 
 		infoVerbose, infoNoClean bool
@@ -29,11 +33,11 @@ func main() {
 	if _, ok := os.LookupEnv("NO_ROOT"); !ok {
 		rootCommand, _ := registry.Register("", "root command help") // root command
 		// rootCommand.AddArg("output", "")                    //
-		rootCommand.AddFlag("force", "f", &rootForce, "force")                 // --force, -f | default value: "false"
-		rootCommand.AddFlag("verbose", "v", &rootVerbose, "verbose")           // --verbose, -v | default value: "false"
-		rootCommand.AddString("version", "V", "", &rootVersion, "set version") // --version, -V | default value: ""
-		rootCommand.AddString("dir", "d", "/var/users", &rootDir, "dir")       // --dir <value> | default value: "/var/users"
+		rootCommand.AddFlag("force", "f", &rootForce, "force")           // --force, -f | default value: "false"
+		rootCommand.AddFlag("verbose", "v", &rootVerbose, "verbose")     // --verbose, -v | default value: "false"
+		rootCommand.AddString("dir", "d", "/var/users", &rootDir, "dir") // --dir <value> | default value: "/var/users"
 		rootCommand.AddStringArgs(-1, &root, "root args")
+		rootCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 	}
 
 	// register the `info` sub-command
@@ -51,7 +55,8 @@ func main() {
 	// listCommand.Args.SetMinLen(1) // set minimal length (at parse step) | default value: 0
 
 	// register the `ghost` sub-command
-	registry.Register("ghost", "ghost help")
+	ghostCommand, _ := registry.Register("ghost", "ghost help")
+	ghostCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 
 	typesCommand, _ := registry.Register("types", "")                              // sub-command
 	typesCommand.AddIntArray("num", "n", []int{1, 24, -2}, &typesNum, "int array") // --num, -n | default value: []int
@@ -60,7 +65,7 @@ func main() {
 	/*----------------*/
 
 	// parse command-line arguments
-	command, _, err := registry.Parse(os.Args[1:], true)
+	command, err := registry.Parse(os.Args[1:])
 
 	/*----------------*/
 
