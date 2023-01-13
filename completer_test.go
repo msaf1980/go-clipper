@@ -24,7 +24,7 @@ func Test_splitQuoted(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %s", i, tt.s), func(t *testing.T) {
-			if got := splitQuoted(tt.s); !reflect.DeepEqual(got, tt.want) {
+			if got := SplitQuoted(tt.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 			}
 		})

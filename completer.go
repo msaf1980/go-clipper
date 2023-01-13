@@ -51,7 +51,7 @@ func appendFlags(commandConfig *CommandConfig, c []string, prefix string) []stri
 	return c
 }
 
-func splitQuoted(s string) []string {
+func SplitQuoted(s string) []string {
 	var (
 		startQuote bool
 	)
@@ -83,7 +83,7 @@ func splitQuoted(s string) []string {
 func (registry *Registry) Completer(line string) (c []string) {
 
 	var commandName string
-	sv := splitQuoted(line)
+	sv := SplitQuoted(line)
 
 	if len(sv) == 0 {
 		c = make([]string, 0, len(registry.Commands)+4)
