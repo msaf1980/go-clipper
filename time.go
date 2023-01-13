@@ -19,7 +19,7 @@ func newTimeValue(val time.Time, p *time.Time, layout string) *timeValue {
 
 func newTimeValueFromString(val string, p *time.Time, layout string) *timeValue {
 	v, err := time.Parse(layout, val)
-	if err == nil {
+	if err != nil {
 		panic(err)
 	}
 	tv := new(timeValue)
