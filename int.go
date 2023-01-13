@@ -20,7 +20,7 @@ func (i *intValue) Set(s string, _ bool) error {
 }
 
 func (iv *intValue) Reset(i interface{}) {
-	v := i.(uint)
+	v := i.(int)
 	*iv = intValue(v)
 }
 
