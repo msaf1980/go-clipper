@@ -188,7 +188,7 @@ When an **unnamed args (not allowed)** is provided in the command-line arguments
 $ go run demo/cmd.go info student -V -v --output ./opt/dir
 
 error => clipper.ErrorUnsupportedFlag{Name:"student"}
-```https://github.com/msaf1980/go-clipper/blob/master/value.go#L11
+```
 
 #### Example 7
 When a command is executed with an **inverted** flag (flag that starts with `--no-` prefix).
