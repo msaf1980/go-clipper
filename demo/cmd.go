@@ -18,7 +18,8 @@ func main() {
 
 		list, listDir []string
 
-		typesNum []int
+		typesNum     []int
+		typesVerbose []bool
 	)
 
 	// create a new registry
@@ -54,6 +55,7 @@ func main() {
 
 	typesCommand, _ := registry.Register("types", "")                              // sub-command
 	typesCommand.AddIntArray("num", "n", []int{1, 24, -2}, &typesNum, "int array") // --num, -n | default value: []int
+	typesCommand.AddMultiFlag("verbose", "v", &typesVerbose, "")                   // --verbose, -v | default value: []
 
 	/*----------------*/
 

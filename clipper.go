@@ -38,16 +38,23 @@ import (
 // format command-line argument values
 func formatCommandValues(values []string) (formatted []string) {
 
-	formatted = make([]string, 0)
+	formatted = make([]string, 0, len(values))
 
 	// split a value by `=`
 	for _, value := range values {
 		if isFlag(value) {
 			parts := strings.Split(value, "=")
-
-			for _, part := range parts {
-				if strings.Trim(part, " ") != "" {
-					formatted = append(formatted, part)
+			if len(parts) == 1 && strings.HasPrefix(parts[0], "-") && len(parts[0]) > 2 &&
+				!strings.HasPrefix(parts[0], "--") && !strings.HasSuffix(parts[0], "...") {
+				// multi-flag
+				for _, c := range parts[0][1:] {
+					formatted = append(formatted, "-"+string(c))
+				}
+			} else {
+				for _, part := range parts {
+					if strings.Trim(part, " ") != "" {
+						formatted = append(formatted, part)
+					}
 				}
 			}
 		} else {
@@ -302,10 +309,14 @@ func (registry *Registry) Parse(values []string, exitOnHelp bool) (commandName s
 				if opt, ok = commandConfig.Opts[flagName]; !ok {
 					return commandName, false, ErrorUnknownFlag{value}
 				}
+				isInverted = opt.IsInverted
 			} else if ok, name := isLongFlag(value); ok {
 				isInverted, name = isInvertedFlag(name)
 				if opt, ok = commandConfig.Opts[name]; !ok {
 					return commandName, false, ErrorUnknownFlag{value}
+				}
+				if isInverted != opt.IsInverted {
+					return commandName, false, ErrorUnsupportedFlag{value}
 				}
 			} else {
 				return commandName, false, ErrorUnknownFlag{value}
@@ -467,6 +478,22 @@ func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool, hel
 	o := commandConfig.AddValue(name, shortName, v, help)
 	o.IsBool = true
 	o.IsInverted = *b
+	return o
+}
+
+// AddMultiFlag registers an bool (direct/inverted) flag with the command.
+// The `name` argument represents the name of the argument.
+// If value of the `name` argument starts with `no-` prefix, then it is a inverted flag.
+// The `shortName` argument represents the short alias of the argument.
+// If an argument with given `name` is already registered, then panic
+// registered `*Opt` object returned.
+func (commandConfig *CommandConfig) AddMultiFlag(name, shortName string, b *[]bool, help string) *Opt {
+	var isInverted bool
+	isInverted, name = isInvertedFlag(name)
+	v := newBoolArrayValue([]bool{}, b)
+	o := commandConfig.AddValue(name, shortName, v, help)
+	o.IsBool = true
+	o.IsInverted = isInverted
 	return o
 }
 

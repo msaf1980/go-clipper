@@ -2,6 +2,7 @@ package clipper
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -24,6 +25,11 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 
 		listVerbose   bool
 		listDir, list []string
+
+		typesNum     []int
+		typesVerbose []bool
+		typesIP      net.IP
+		typesIPs     []net.IP
 	)
 	store := make(map[string]map[string]interface{})
 	storeValues := make(map[string]map[string]*Opt)
@@ -39,6 +45,9 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 
 	store["list"] = make(map[string]interface{})
 	storeValues["list"] = make(map[string]*Opt)
+
+	store["types"] = make(map[string]interface{})
+	storeValues["types"] = make(map[string]*Opt)
 
 	// create a new registry
 	registry := NewRegistry("")
@@ -80,12 +89,25 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 	// register the `list` sub-command
 	listCommand, _ := registry.Register("list", "") // sub-command
 	store["list"]["verbose"] = &listVerbose
-	storeValues["list"]["verbose"] = listCommand.AddFlag("verbose", "v", &listVerbose, "") // --verbose, -v | default value: "false"
+	storeValues["list"]["verbose"] = listCommand.AddFlag("verbose", "v", &listVerbose, "") // --verbose, -v | default value: []
 	listDirDefault := []string{"a"}
 	store["list"]["dir"] = &listDir
 	storeValues["list"]["dir"] = listCommand.AddStringArray("dir", "d", listDirDefault, &listDir, "") // --output, -o <value> | default value: "./"
 	store["list"][""] = &list
 	listCommand.AddStringArgs(-1, &list, "")
+
+	// register the `types` sub-command
+	typesCommand, _ := registry.Register("types", "") // sub-command
+	store["types"]["num"] = &typesNum
+	storeValues["types"]["num"] = typesCommand.AddIntArray("num", "n", []int{}, &typesNum, "") // --num, -n | default value: []
+	// multi-flag
+	store["types"]["verbose"] = &typesVerbose
+	storeValues["types"]["verbose"] = typesCommand.AddMultiFlag("verbose", "v", &typesVerbose, "") // --verbose, -v | default value: []
+	// ip
+	store["types"]["ip"] = &typesIP
+	storeValues["types"]["ip"] = typesCommand.AddIPFromString("ip", "i", "0.0.0.0", &typesIP, "") // --ip, -i | default value: 0.0.0.0
+	store["types"]["ips"] = &typesIPs
+	storeValues["types"]["ips"] = typesCommand.AddIPArrayFromCSV("ips", "", "", &typesIPs, "") // --ips | default value: []
 
 	// register the `ghost` sub-command
 	registry.Register("ghost", "")
@@ -152,6 +174,16 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 			},
 		},
 		{
+			values: []string{"info", "-V=1.0.1", "-v", "-N", "--output=/sub/dir"},
+			want:   "info",
+			wantVars: map[string]interface{}{
+				"version": "1.0.1",
+				"verbose": true,
+				"clean":   false,
+				"output":  "/sub/dir",
+			},
+		},
+		{
 			values: []string{"info", "--output=/sub/dir"},
 			want:   "info",
 			wantVars: map[string]interface{}{
@@ -209,6 +241,36 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 			want:    "ghost",
 			wantErr: `unknown flag "-v" found`,
 		},
+		// extended types
+		{
+			values: []string{"types", "-n", "1,0,2"},
+			want:   "types",
+			wantVars: map[string]interface{}{
+				"num":     []int{1, 0, 2},
+				"verbose": []bool{},
+				"ip":      net.IPv4(0, 0, 0, 0),
+				"ips":     []net.IP{},
+			},
+		},
+		{
+			values: []string{"types", "-i", "192.168.0.1", "--ips", "192.168.0.2", "--ips", "127.0.0.1,::1", "-vvv", "-v"},
+			want:   "types",
+			wantVars: map[string]interface{}{
+				"num":     []int{}, // default
+				"verbose": []bool{true, true, true, true},
+				"ip":      net.IPv4(192, 168, 0, 1),
+				"ips": []net.IP{
+					net.IPv4(192, 168, 0, 2),
+					net.IPv4(127, 0, 0, 1),
+					net.IPv6loopback,
+				},
+			},
+		},
+		{
+			values:  []string{"types", "-n", "1,0,a"},
+			want:    "types",
+			wantErr: `parsing "a": invalid syntax`,
+		},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
@@ -231,9 +293,19 @@ func TestRegistry_Parse_RootArgs(t *testing.T) {
 					switch v := store[got][k].(type) {
 					case *string:
 						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]string:
+						assert.Equal(t, o.Value.Get(), *v, k)
 					case *bool:
 						assert.Equal(t, o.Value.Get(), *v, k)
-					case *[]string:
+					case *[]bool:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *net.IP:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]net.IP:
 						assert.Equal(t, o.Value.Get(), *v, k)
 					default:
 						t.Fatalf("%T is unhandled", v)
@@ -360,9 +432,15 @@ func TestRegistry_Parse_RootNoArgs(t *testing.T) {
 					switch v := store[got][k].(type) {
 					case *string:
 						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]string:
+						assert.Equal(t, o.Value.Get(), *v, k)
 					case *bool:
 						assert.Equal(t, o.Value.Get(), *v, k)
-					case *[]string:
+					case *[]bool:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]int:
 						assert.Equal(t, o.Value.Get(), *v, k)
 					default:
 						t.Fatalf("%T is unhandled", v)
@@ -484,9 +562,15 @@ func TestRegistry_Parse_NoRoot(t *testing.T) {
 					switch v := store[got][k].(type) {
 					case *string:
 						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]string:
+						assert.Equal(t, o.Value.Get(), *v, k)
 					case *bool:
 						assert.Equal(t, o.Value.Get(), *v, k)
-					case *[]string:
+					case *[]bool:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *int:
+						assert.Equal(t, o.Value.Get(), *v, k)
+					case *[]int:
 						assert.Equal(t, o.Value.Get(), *v, k)
 					default:
 						t.Fatalf("%T is unhandled", v)
@@ -672,90 +756,6 @@ func TestRegistry_Parse_Limits(t *testing.T) {
 
 /*----------------*/
 
-func TestRegistry_Parse_CustomTypes_Error(t *testing.T) {
-	var (
-		infoNum []int
-	)
-	store := make(map[string]map[string]interface{})
-	storeValues := make(map[string]map[string]*Opt)
-
-	store["info"] = make(map[string]interface{})
-	storeValues["info"] = make(map[string]*Opt)
-
-	// create a new registry
-	registry := NewRegistry("")
-
-	// register the `info` sub-command
-	infoCommand, _ := registry.Register("info", "") // sub-command
-	store["info"]["num"] = &infoNum
-	storeValues["info"]["num"] = infoCommand.AddIntArray("num", "n", []int{}, &infoNum, "") // --num, -n | default value: []int
-
-	tests := []struct {
-		values   []string
-		want     string
-		wantVars map[string]interface{}
-		wantArgs []string
-		wantErr  string
-	}{
-		{
-			values: []string{"info", "-n", "1,0,2"},
-			want:   "info",
-			wantVars: map[string]interface{}{
-				"num": []int{1, 0, 2},
-			},
-		},
-		{
-			values:  []string{"info", "-n", "1,0,a"},
-			want:    "info",
-			wantErr: `parsing "a": invalid syntax`,
-		},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("[%d] %v", i, tt.values), func(t *testing.T) {
-			registry.Reset()
-			got, _, err := registry.Parse(tt.values, true)
-			if err == nil && tt.wantErr != "" {
-				t.Errorf("Registry.Parse() wantErr %q", tt.wantErr)
-				return
-			} else if err != nil {
-				if tt.wantErr == "" || !strings.Contains(err.Error(), tt.wantErr) {
-					t.Errorf("Registry.Parse() error = %q, wantErr %q", err.Error(), tt.wantErr)
-					return
-				}
-			} else if got == tt.want {
-				gotV := registry.Commands[got]
-				for k, o := range gotV.Opts {
-					wantVar := tt.wantVars[k]
-					assert.Equal(t, wantVar, o.Value.Get(), k)
-					assert.Equal(t, o.Value.Get(), storeValues[got][k].Value.Get(), k)
-					switch v := store[got][k].(type) {
-					case *string:
-						assert.Equal(t, o.Value.Get(), *v, k)
-					case *[]string:
-						assert.Equal(t, o.Value.Get(), *v, k)
-					case *bool:
-						assert.Equal(t, o.Value.Get(), *v, k)
-					case *int:
-						assert.Equal(t, o.Value.Get(), *v, k)
-					case *[]int:
-						assert.Equal(t, o.Value.Get(), *v, k)
-					default:
-						t.Fatalf("%T is unhandled", v)
-					}
-				}
-				a := store[got][""]
-				if len(tt.wantArgs) > 0 && a != nil && len(*(a.(*[]string))) > 0 {
-					assert.Equal(t, &tt.wantArgs, a, "args")
-				}
-			} else {
-				t.Errorf("Registry.Parse() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-/*----------------*/
-
 // test unsupported flag
 func TestUnsupportedAssignment(t *testing.T) {
 
@@ -864,7 +864,7 @@ func TestUnsupportedFlag(t *testing.T) {
 
 	// flags
 	flags := map[string][]string{
-		"-force":  {"-V", "1.0.1", "-v", "-force", "-d", "./sub/dir"},
+		// "-force":  {"-V", "1.0.1", "-v", "-force", "-d", "./sub/dir"},
 		"student": {"info", "student", "-V", "-v", "--output", "./opt/dir", "--no-clean"},
 	}
 
@@ -879,6 +879,32 @@ func TestUnsupportedFlag(t *testing.T) {
 			} else {
 				out := string(output)
 				errStr := fmt.Sprintf(`error => clipper.ErrorUnsupportedFlag{Name:"%s"}`, flag)
+				if !strings.Contains(out, errStr) {
+					t.Fatalf("got\n%s\nwant\n%s", out, errStr)
+				}
+			}
+		})
+	}
+}
+
+func TestMultiFlag(t *testing.T) {
+
+	// flags
+	flags := map[string][]string{
+		"-i": {"-V", "1.0.1", "-v", "-dir", "-d", "./sub/dir"},
+	}
+
+	for flag, options := range flags {
+		t.Run(flag, func(t *testing.T) {
+			// command
+			cmd := exec.Command("go", append([]string{"run", "demo/cmd.go"}, options...)...)
+
+			// get output
+			if output, err := cmd.Output(); err != nil {
+				t.Fatalf("Error: %v, out: %q", err, string(output))
+			} else {
+				out := string(output)
+				errStr := fmt.Sprintf(`error => clipper.ErrorUnknownFlag{Name:"%s"}`, flag)
 				if !strings.Contains(out, errStr) {
 					t.Fatalf("got\n%s\nwant\n%s", out, errStr)
 				}
