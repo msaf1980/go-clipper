@@ -95,6 +95,7 @@ func TestCompleter(t *testing.T) {
 				// "-d",
 				"--version",
 				// "-V",
+				"--help",
 				// all commands except root ("")
 				"ghost",
 				"info",
@@ -126,6 +127,7 @@ func TestCompleter(t *testing.T) {
 				// "-d",
 				"--version",
 				// "-V",
+				"--help",
 			},
 		},
 		{
@@ -158,6 +160,7 @@ func TestCompleter(t *testing.T) {
 				// "-o",
 				"--clean",
 				// "-N",
+				"--help",
 			},
 		},
 		{
@@ -172,6 +175,7 @@ func TestCompleter(t *testing.T) {
 				// "-o",
 				"--clean",
 				// "-N",
+				"--help",
 			},
 		},
 		{
@@ -289,6 +293,7 @@ func TestCompleter_NoRoot(t *testing.T) {
 				// "-o",
 				"--clean",
 				// "-N",
+				"--help",
 			},
 		},
 		{
@@ -303,6 +308,7 @@ func TestCompleter_NoRoot(t *testing.T) {
 				// "-o",
 				"--clean",
 				// "-N",
+				"--help",
 			},
 		},
 		{
@@ -420,6 +426,7 @@ func TestCompleterAppended(t *testing.T) {
 				//  "info  -o",
 				"info  --clean",
 				// "info  -N",
+				"info  --help",
 			},
 		},
 		{
@@ -434,6 +441,7 @@ func TestCompleterAppended(t *testing.T) {
 				// "info -o",
 				"info --clean",
 				// "info -N",
+				"info --help",
 			},
 		},
 		{

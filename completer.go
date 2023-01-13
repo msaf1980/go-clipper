@@ -69,6 +69,14 @@ func appendFlags(commandConfig *CommandConfig, c []string, last, line string) []
 		// 	}
 		// }
 	}
+	if last != "--help" && strings.HasPrefix("--help", last) {
+		if line == "" {
+			c = append(c, "--help")
+		} else {
+			c = append(c, line[:len(line)-len(last)]+"--help")
+		}
+	}
+
 	return c
 }
 
