@@ -365,10 +365,12 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 
 			// set flag value
 			if opt.IsBool {
-				if isInverted {
-					opt.Set("false") // if flag is an inverted flag, its value will be `false`
-				} else {
-					opt.Set("true")
+				if !dryRun {
+					if isInverted {
+						opt.Set("false") // if flag is an inverted flag, its value will be `false`
+					} else {
+						opt.Set("true")
+					}
 				}
 			} else {
 				for {
@@ -376,8 +378,10 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 						if !opt.Validate(nextValue) {
 							return commandName, false, ErrorUnsupportedValue{opt.Name, nextValue}
 						}
-						if err = opt.Set(nextValue); err != nil {
-							return commandName, false, WrapInvalidValue(strconv.Quote(commandName), err)
+						if !dryRun {
+							if err = opt.Set(nextValue); err != nil {
+								return commandName, false, WrapInvalidValue(strconv.Quote(commandName), err)
+							}
 						}
 						valuesToProcess = nextValuesToProcess
 					} else {
@@ -389,19 +393,23 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 				}
 			}
 		} else {
-			if err := commandConfig.Args.Set(value, true); err != nil {
-				return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
+			if !dryRun {
+				if err := commandConfig.Args.Set(value, true); err != nil {
+					return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
+				}
 			}
 		}
 	}
 
-	if err = commandConfig.Args.CheckLen(); err != nil {
-		return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
-	}
+	if !dryRun {
+		if err = commandConfig.Args.CheckLen(); err != nil {
+			return commandName, false, WrapInvalidValue(strconv.Quote(commandName)+" unnamed args", err)
+		}
 
-	for _, opt := range commandConfig.Opts {
-		if opt.IsRequired && !opt.Changed {
-			return commandName, false, ErrorRequiredFlag{opt.Name}
+		for _, opt := range commandConfig.Opts {
+			if opt.IsRequired && !opt.Changed {
+				return commandName, false, ErrorRequiredFlag{opt.Name}
+			}
 		}
 	}
 
