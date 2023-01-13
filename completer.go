@@ -103,7 +103,7 @@ func (registry *Registry) Completer(line string) (c []string) {
 	commandConfig, ok := registry.Commands[commandName]
 	if !ok {
 		c = make([]string, 0)
-		if len(sv) == 1 {
+		if len(sv) == 1 && !strings.HasPrefix(sv[0], "-") {
 			c = appendCommands(registry, c, commandName)
 		}
 		return
