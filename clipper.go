@@ -248,9 +248,16 @@ func (registry *Registry) Register(name string, help string) (*CommandConfig, bo
 	return commandConfig, false
 }
 
-// Reset method reset values to it's default values.
+// Reset method reset all values to it's default values.
 func (registry *Registry) Reset() {
 	for _, cmd := range registry.Commands {
+		cmd.Reset()
+	}
+}
+
+// ResetCommand method reset values in command scope to it's default values.
+func (registry *Registry) ResetCommand(commandName string) {
+	if cmd, ok := registry.Commands[commandName]; ok {
 		cmd.Reset()
 	}
 }
