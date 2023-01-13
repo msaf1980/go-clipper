@@ -51,10 +51,8 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		fmt.Printf("  %5s%-25s\t%s", shortName, nameAndArgs, opt.Help)
 		if opt.IsRequired {
 			fmt.Printf(" (required)\n")
-			// } else if v, ok := opt.defaultValue.(bool); ok {
-			// 	fmt.Printf(" (default %v)\n", v)
 		} else {
-			fmt.Printf(" (default: %q)\n", opt.Value.String())
+			fmt.Printf(" (default: %q)\n", opt.defaultStr)
 		}
 	}
 	fmt.Printf("  -h | %-25s\thelp", "--help")

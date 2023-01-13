@@ -449,6 +449,7 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, he
 
 	// store init value as default for restore on reset
 	opt.defaultValue = opt.Value.Get()
+	opt.defaultStr = opt.Value.String()
 	commandConfig.OptsOrder = append(commandConfig.OptsOrder, name)
 
 	return opt
@@ -485,6 +486,7 @@ type Opt struct {
 	Changed      bool        // if the user set the value (or if left to default)
 	Value        Value       // value as set
 	defaultValue interface{} // store init value, used for reset
+	defaultStr   string      // store init value, used for print help
 }
 
 // Set set
