@@ -4,6 +4,10 @@ A simple Go package to parse command-line arguments [_getopt(3) style_](http://m
 Main advantage - state might be reset to initial state (to default values and set unchanged).
 So can be simple reused in embedded interactive CLI.
 
+Based on [clapper](https://github.com/thatisuday/clapper), but typed (not string for all) and has more features.
+
+Can be simple extended for additional types (see [Value](https://github.com/msaf1980/go-clipper/blob/master/value.go#L11) interface, base on extended [pflag](https://github.com/spf13/pflag)).
+
 ## Documentation
 [**pkg.go.dev**](https://pkg.go.dev/github.com/msaf1980/go-clipper?tab=doc)
 
