@@ -20,7 +20,7 @@ func (i *int8Value) Set(s string, _ bool) error {
 }
 
 func (iv *int8Value) Reset(i interface{}) {
-	v := i.(uint8)
+	v := i.(int8)
 	*iv = int8Value(v)
 }
 

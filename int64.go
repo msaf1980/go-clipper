@@ -20,7 +20,7 @@ func (i *int64Value) Set(s string, _ bool) error {
 }
 
 func (iv *int64Value) Reset(i interface{}) {
-	v := i.(uint64)
+	v := i.(int64)
 	*iv = int64Value(v)
 }
 

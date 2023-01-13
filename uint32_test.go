@@ -36,4 +36,6 @@ func TestUint32_12(t *testing.T) {
 	require.Equal(t, uint32(12), v.GetUint32())
 	i := v.Get()
 	require.Equal(t, uint32(12), i)
+
+	v.Reset(uint32(12))
 }

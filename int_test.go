@@ -36,4 +36,6 @@ func TestInt_12(t *testing.T) {
 	require.Equal(t, int(12), v.GetInt())
 	i := v.Get()
 	require.Equal(t, int(12), i)
+
+	v.Reset(int(12))
 }

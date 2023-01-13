@@ -36,4 +36,6 @@ func TestInt64_12(t *testing.T) {
 	require.Equal(t, int64(12), v.GetInt64())
 	i := v.Get()
 	require.Equal(t, int64(12), i)
+
+	v.Reset(int64(12))
 }

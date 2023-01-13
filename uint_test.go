@@ -36,4 +36,6 @@ func TestUint_12(t *testing.T) {
 	require.Equal(t, uint(12), v.GetUint())
 	i := v.Get()
 	require.Equal(t, uint(12), i)
+
+	v.Reset(uint(12))
 }
