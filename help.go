@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-func PrintHelp(registry *Registry, commandName string, commandConfig *CommandConfig) {
+func PrintHelp(registry *Registry, commandName string, commandConfig *CommandConfig, printCmdName bool) {
 
 	if commandConfig == nil {
 		fmt.Fprintf(os.Stderr, "\n  command %q not registered\n", commandName)
@@ -17,7 +17,11 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		if registry.Description != "" {
 			fmt.Printf("%s\n\n\n", registry.Description)
 		}
-		fmt.Printf("Usage:\n  %s [command] [options]\n\n", os.Args[0])
+		if printCmdName {
+			fmt.Printf("Usage:\n  %s [command] [options]\n\n", os.Args[0])
+		} else {
+			fmt.Print("Usage:\n  [command] [options]\n\n")
+		}
 
 		commands := make([]string, 0, len(registry.Commands))
 		for command := range registry.Commands {

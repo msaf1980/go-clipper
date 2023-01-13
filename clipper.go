@@ -292,7 +292,7 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 	valuesToProcess = formatCommandValues(valuesToProcess)
 
 	if hasHelpFlag(valuesToProcess) {
-		PrintHelp(registry, commandName, commandConfig)
+		PrintHelp(registry, commandName, commandConfig, exitOnHelp)
 		if exitOnHelp {
 			os.Exit(0)
 		}
