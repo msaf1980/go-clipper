@@ -40,7 +40,11 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 	fmt.Println("Flags:")
 	for _, flagName := range commandConfig.OptsOrder {
 		opt := commandConfig.Opts[flagName]
-		nameAndArgs := "--" + opt.Name
+		nameAndArgs := "--"
+		if opt.IsInverted {
+			nameAndArgs += "no-"
+		}
+		nameAndArgs += opt.Name
 		shortName := ""
 		if opt.ShortName != "" {
 			shortName += "-" + opt.ShortName + " | "
@@ -48,11 +52,14 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		if !opt.IsBool {
 			nameAndArgs += " " + opt.Value.Type()
 		}
-		fmt.Printf("  %5s%-25s\t%s", shortName, nameAndArgs, opt.Help)
+		fmt.Printf("  %5s%-25s\t", shortName, nameAndArgs)
+		if opt.Help != "" {
+			fmt.Printf("%s ", opt.Help)
+		}
 		if opt.IsRequired {
-			fmt.Printf(" (required)\n")
+			fmt.Printf("(required)\n")
 		} else {
-			fmt.Printf(" (default: %q)\n", opt.defaultStr)
+			fmt.Printf("(default: %q)\n", opt.defaultStr)
 		}
 	}
 	fmt.Printf("  -h | %-25s\thelp", "--help")
