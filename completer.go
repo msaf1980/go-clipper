@@ -80,6 +80,13 @@ func appendFlags(commandConfig *CommandConfig, c []string, last, line string) []
 	return c
 }
 
+func trimQuoted(s string) string {
+	if strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+		return s[1 : len(s)-1]
+	}
+	return s
+}
+
 func SplitQuoted(s string) []string {
 	var (
 		startQuote bool
@@ -93,7 +100,7 @@ func SplitQuoted(s string) []string {
 			if !startQuote {
 				v := s[start:i]
 				if !isBlanc(v) {
-					sv = append(sv, v)
+					sv = append(sv, trimQuoted(v))
 				}
 				start = i + 1
 			}
@@ -103,7 +110,7 @@ func SplitQuoted(s string) []string {
 	}
 	v := s[start:]
 	if !isBlanc(v) {
-		sv = append(sv, v)
+		sv = append(sv, trimQuoted(v))
 	}
 
 	return sv

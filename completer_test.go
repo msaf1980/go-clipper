@@ -15,11 +15,15 @@ func Test_splitQuoted(t *testing.T) {
 	}{
 		{
 			s:    `--version 1.0.1 --dir "/c/P F" --dir "/opt" -v`,
-			want: []string{"--version", "1.0.1", "--dir", `"/c/P F"`, "--dir", `"/opt"`, "-v"},
+			want: []string{"--version", "1.0.1", "--dir", `/c/P F`, "--dir", `/opt`, "-v"},
 		},
 		{
 			s:    ` --version 1.0.1 --dir "/c/P F" --dir "/opt" -v `,
-			want: []string{"--version", "1.0.1", "--dir", `"/c/P F"`, "--dir", `"/opt"`, "-v"},
+			want: []string{"--version", "1.0.1", "--dir", `/c/P F`, "--dir", `/opt`, "-v"},
+		},
+		{
+			s:    ` --version 1.0.1 -s "" -S " "  -v `,
+			want: []string{"--version", "1.0.1", "-s", "", "-S", " ", "-v"},
 		},
 	}
 	for i, tt := range tests {
