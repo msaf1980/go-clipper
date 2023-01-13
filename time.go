@@ -38,7 +38,7 @@ func (t *timeValue) Get() interface{} {
 	return *t.value
 }
 
-func (t *timeValue) String() string { return t.value.Format(time.RFC3339Nano) }
+func (t *timeValue) String() string { return t.value.Format(t.layout) }
 
 func (t *timeValue) GetTime() time.Time { return *t.value }
 

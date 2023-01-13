@@ -51,12 +51,12 @@ func TestTime(t *testing.T) {
 			err := tr.Set(tt.in, true)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("timeValue.Set() error = '%v', wantErr = %v", err, tt.wantErr)
-			} else if tr.String() != tt.want.Format(time.RFC3339Nano) {
-				t.Errorf("timeValue.Set() = '%s', want '%s'", tr.String(), tt.want.Format(time.RFC3339Nano))
+			} else if tr.String() != tt.want.Format(tt.layout) {
+				t.Errorf("timeValue.Set() = '%s', want '%s'", tr.String(), tt.want.Format(tt.layout))
 			}
-			s := tr.Get().(time.Time).Format(time.RFC3339Nano)
-			if s != tt.want.Format(time.RFC3339Nano) {
-				t.Errorf("timeValue.Set() = '%s', want '%s'", s, tt.want.Format(time.RFC3339Nano))
+			s := tr.Get().(time.Time).Format(tt.layout)
+			if s != tt.want.Format(tt.layout) {
+				t.Errorf("timeValue.Set() = '%s', want '%s'", s, tt.want.Format(tt.layout))
 			}
 		})
 	}
