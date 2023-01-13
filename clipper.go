@@ -251,10 +251,7 @@ func (registry *Registry) Register(name string, help string) (*CommandConfig, bo
 // Reset method reset values to it's default values.
 func (registry *Registry) Reset() {
 	for _, cmd := range registry.Commands {
-		for _, opt := range cmd.Opts {
-			opt.Reset()
-		}
-		cmd.Args.Reset([]string{})
+		cmd.Reset()
 	}
 }
 
@@ -440,6 +437,14 @@ type CommandConfig struct {
 	Args Arg
 	// help message for command unnamed arguments
 	ArgsHelp string
+}
+
+// Reset method reset values to it's default values.
+func (commandConfig *CommandConfig) Reset() {
+	for _, opt := range commandConfig.Opts {
+		opt.Reset()
+	}
+	commandConfig.Args.Reset([]string{})
 }
 
 // AddStringArgs set unnamed argument configuration with the command.
