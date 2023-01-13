@@ -40,16 +40,16 @@ func appendFlags(commandConfig *CommandConfig, c []string, last, line string) []
 				c = append(c, line[:len(line)-len(last)]+name)
 			}
 		}
-		if opt.ShortName != "" {
-			name = "-" + opt.ShortName
-			if name != last && strings.HasPrefix(name, last) {
-				if line == "" {
-					c = append(c, name)
-				} else {
-					c = append(c, line[:len(line)-len(last)]+name)
-				}
-			}
-		}
+		// if opt.ShortName != "" {
+		// 	name = "-" + opt.ShortName
+		// 	if name != last && strings.HasPrefix(name, last) {
+		// 		if line == "" {
+		// 			c = append(c, name)
+		// 		} else {
+		// 			c = append(c, line[:len(line)-len(last)]+name)
+		// 		}
+		// 	}
+		// }
 	}
 	if commandConfig.version != nil {
 		if commandConfig.version.name != last && strings.HasPrefix(commandConfig.version.name, last) {
@@ -59,15 +59,15 @@ func appendFlags(commandConfig *CommandConfig, c []string, last, line string) []
 				c = append(c, line[:len(line)-len(last)]+commandConfig.version.name)
 			}
 		}
-		if commandConfig.version.shortName != last &&
-			commandConfig.version.shortName != "" && strings.HasPrefix(commandConfig.version.shortName, last) {
+		// if commandConfig.version.shortName != last &&
+		// 	commandConfig.version.shortName != "" && strings.HasPrefix(commandConfig.version.shortName, last) {
 
-			if line == "" {
-				c = append(c, commandConfig.version.shortName)
-			} else {
-				c = append(c, line[:len(line)-len(last)]+commandConfig.version.shortName)
-			}
-		}
+		// 	if line == "" {
+		// 		c = append(c, commandConfig.version.shortName)
+		// 	} else {
+		// 		c = append(c, line[:len(line)-len(last)]+commandConfig.version.shortName)
+		// 	}
+		// }
 	}
 	return c
 }

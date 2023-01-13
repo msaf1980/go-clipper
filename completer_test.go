@@ -87,10 +87,14 @@ func TestCompleter(t *testing.T) {
 			line: "",
 			want: []string{
 				//root command flags
-				"--force", "-f",
-				"--verbose", "-v",
-				"--dir", "-d",
-				"--version", "-V",
+				"--force",
+				// "-f",
+				"--verbose",
+				// "-v",
+				"--dir",
+				// "-d",
+				"--version",
+				// "-V",
 				// all commands except root ("")
 				"ghost",
 				"info",
@@ -114,10 +118,14 @@ func TestCompleter(t *testing.T) {
 			line: "-",
 			want: []string{
 				// all flags for root cmd
-				"--force", "-f",
-				"--verbose", "-v",
-				"--dir", "-d",
-				"--version", "-V",
+				"--force",
+				// "-f",
+				"--verbose",
+				// "-v",
+				"--dir",
+				// "-d",
+				"--version",
+				// "-V",
 			},
 		},
 		{
@@ -142,20 +150,28 @@ func TestCompleter(t *testing.T) {
 			line: "info ",
 			want: []string{
 				// all flags for info cmd
-				"--verbose", "-v",
-				"--version", "-V",
-				"--output", "-o",
-				"--clean", "-N",
+				"--verbose",
+				// "-v",
+				"--version",
+				// "-V",
+				"--output",
+				// "-o",
+				"--clean",
+				// "-N",
 			},
 		},
 		{
 			line: "info -",
 			want: []string{
 				// all flags for info cmd
-				"--verbose", "-v",
-				"--version", "-V",
-				"--output", "-o",
-				"--clean", "-N",
+				"--verbose",
+				// "-v",
+				"--version",
+				// "-V",
+				"--output",
+				// "-o",
+				"--clean",
+				// "-N",
 			},
 		},
 		{
@@ -265,20 +281,28 @@ func TestCompleter_NoRoot(t *testing.T) {
 			line: "info ",
 			want: []string{
 				// all flags for info cmd
-				"--verbose", "-v",
-				"--version", "-V",
-				"--output", "-o",
-				"--clean", "-N",
+				"--verbose",
+				// "-v",
+				"--version",
+				// "-V",
+				"--output",
+				// "-o",
+				"--clean",
+				// "-N",
 			},
 		},
 		{
 			line: "info -",
 			want: []string{
 				// all flags for info cmd
-				"--verbose", "-v",
-				"--version", "-V",
-				"--output", "-o",
-				"--clean", "-N",
+				"--verbose",
+				// "-v",
+				"--version",
+				// "-V",
+				"--output",
+				// "-o",
+				"--clean",
+				// "-N",
 			},
 		},
 		{
@@ -388,20 +412,28 @@ func TestCompleterAppended(t *testing.T) {
 			line: "info  ",
 			want: []string{
 				// all flags for info cmd
-				"info  --verbose", "info  -v",
-				"info  --version", "info  -V",
-				"info  --output", "info  -o",
-				"info  --clean", "info  -N",
+				"info  --verbose",
+				// "info  -v",
+				"info  --version",
+				// "info  -V",
+				"info  --output",
+				//  "info  -o",
+				"info  --clean",
+				// "info  -N",
 			},
 		},
 		{
 			line: "info -",
 			want: []string{
 				// all flags for info cmd
-				"info --verbose", "info -v",
-				"info --version", "info -V",
-				"info --output", "info -o",
-				"info --clean", "info -N",
+				"info --verbose",
+				// "info -v",
+				"info --version",
+				// "info -V",
+				"info --output",
+				// "info -o",
+				"info --clean",
+				// "info -N",
 			},
 		},
 		{
