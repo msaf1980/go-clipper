@@ -40,7 +40,11 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 	fmt.Println("Flags:")
 	for _, flagName := range commandConfig.OptsOrder {
 		opt := commandConfig.Opts[flagName]
-		nameAndArgs := "--" + opt.Name
+		nameAndArgs := "--"
+		if opt.IsInverted {
+			nameAndArgs += "no-"
+		}
+		nameAndArgs += opt.Name
 		shortName := ""
 		if opt.ShortName != "" {
 			shortName += "-" + opt.ShortName + " | "
