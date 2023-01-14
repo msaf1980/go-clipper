@@ -89,7 +89,9 @@ func (s *intArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIntArray(name, shortName string, value []int, p *[]int, help string) *Opt {
 	v := newIntArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	opt := commandConfig.AddValue(name, shortName, v, true, help)
+	opt.IsMultiValue = true
+	return opt
 }
 
 // AddIntArrayFromCSV registers an int argument configuration with the command.
@@ -99,5 +101,7 @@ func (commandConfig *CommandConfig) AddIntArray(name, shortName string, value []
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIntArrayFromCSV(name, shortName string, value string, p *[]int, help string) *Opt {
 	v := newIntArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	opt := commandConfig.AddValue(name, shortName, v, true, help)
+	opt.IsMultiValue = true
+	return opt
 }

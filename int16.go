@@ -43,5 +43,5 @@ func (i *int16Value) Getint16() int16 { return int16(*i) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt16(name, shortName string, value int16, p *int16, help string) *Opt {
 	v := newint16Value(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

@@ -89,7 +89,7 @@ func (s *int32ArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt32Array(name, shortName string, value []int32, p *[]int32, help string) *Opt {
 	v := newInt32ArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // AddInt32ArrayFromCSV registers an int argument configuration with the command.
@@ -99,5 +99,5 @@ func (commandConfig *CommandConfig) AddInt32Array(name, shortName string, value 
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt32ArrayFromCSV(name, shortName string, value string, p *[]int32, help string) *Opt {
 	v := newInt32ArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

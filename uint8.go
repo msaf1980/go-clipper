@@ -43,5 +43,5 @@ func (u *uint8Value) GetUint8() uint8 { return uint8(*u) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddUint8(name, shortName string, value uint8, p *uint8, help string) *Opt {
 	v := newUint8Value(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

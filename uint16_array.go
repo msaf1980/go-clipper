@@ -89,7 +89,7 @@ func (s *uint16ArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddUint16Array(name, shortName string, value []uint16, p *[]uint16, help string) *Opt {
 	v := newUint16ArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // AddUint16ArrayFromCSV registers an int argument configuration with the command.
@@ -99,5 +99,5 @@ func (commandConfig *CommandConfig) AddUint16Array(name, shortName string, value
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddUint16ArrayFromCSV(name, shortName string, value string, p *[]uint16, help string) *Opt {
 	v := newUint16ArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

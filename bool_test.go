@@ -8,7 +8,7 @@ import (
 
 func TestBoolFalse(t *testing.T) {
 	var b bool
-	v := newBoolValue(&b)
+	v := newBoolValue(false, &b)
 
 	require.False(t, b)
 
@@ -22,8 +22,8 @@ func TestBoolFalse(t *testing.T) {
 }
 
 func TestBoolTrue(t *testing.T) {
-	b := true
-	v := newBoolValue(&b)
+	var b bool
+	v := newBoolValue(true, &b)
 
 	require.True(t, b)
 
@@ -33,8 +33,8 @@ func TestBoolTrue(t *testing.T) {
 }
 
 func TestBoolReset(t *testing.T) {
-	b := true
-	v := newBoolValue(&b)
+	var b bool
+	v := newBoolValue(true, &b)
 
 	require.True(t, b)
 

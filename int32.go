@@ -43,5 +43,5 @@ func (i *int32Value) Getint32() int32 { return int32(*i) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt32(name, shortName string, value int32, p *int32, help string) *Opt {
 	v := newint32Value(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

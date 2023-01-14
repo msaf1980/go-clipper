@@ -41,5 +41,5 @@ func (s *stringValue) String() string { return s.GetString() }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddString(name, shortName string, value string, p *string, help string) *Opt {
 	v := newStringValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

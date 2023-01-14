@@ -90,7 +90,7 @@ func (s *ipArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIPArray(name, shortName string, value []net.IP, p *[]net.IP, help string) *Opt {
 	v := newIPArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // Addnet.IPArrayFromCSV registers an int argument configuration with the command.
@@ -100,5 +100,5 @@ func (commandConfig *CommandConfig) AddIPArray(name, shortName string, value []n
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIPArrayFromCSV(name, shortName string, value string, p *[]net.IP, help string) *Opt {
 	v := newIPArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

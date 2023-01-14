@@ -43,5 +43,5 @@ func (i *int64Value) GetInt64() int64 { return int64(*i) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt64(name, shortName string, value int64, p *int64, help string) *Opt {
 	v := newInt64Value(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

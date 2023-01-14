@@ -368,7 +368,7 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 			}
 
 			// set flag value
-			if opt.IsBool {
+			if opt.IsFlag {
 				if !dryRun {
 					if isInverted {
 						opt.Set("false") // if flag is an inverted flag, its value will be `false`
@@ -454,6 +454,24 @@ func (commandConfig *CommandConfig) Reset() {
 	commandConfig.Args.Reset([]string{})
 }
 
+// Reset method reset values to it's default values.
+func (commandConfig *CommandConfig) GetFlag(flag string) *Opt {
+	if ok, flagName := isLongFlag(flag); ok {
+		if ok, name := isInvertedFlag(flagName); ok {
+			return commandConfig.Opts[name]
+		}
+		if ok, name := isVariadicArgument(flagName); ok {
+			return commandConfig.Opts[name]
+		}
+		return commandConfig.Opts[flagName]
+	} else if ok, flagName := isShortFlag(flag); ok {
+		if flagName, ok = commandConfig.short[flagName]; ok {
+			return commandConfig.Opts[flagName]
+		}
+	}
+	return nil
+}
+
 // AddStringArgs set unnamed argument configuration with the command.
 // The `max` argument represents maximum length of unnamed args (-1 - unlimited).
 // `Arg` object returned.
@@ -476,7 +494,7 @@ func (commandConfig *CommandConfig) DisableArgs() Arg {
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
-func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, help string) *Opt {
+func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, isMultiValue bool, help string) *Opt {
 
 	// clean argument values
 	name = removeWhitespaces(name)
@@ -504,10 +522,11 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, he
 
 	// create `Arg` object
 	opt := &Opt{
-		Name:      name,
-		ShortName: shortName,
-		Value:     v,
-		Help:      help,
+		Name:         name,
+		ShortName:    shortName,
+		Value:        v,
+		Help:         help,
+		IsMultiValue: isMultiValue,
 	}
 
 	// register argument with the command-config
@@ -535,10 +554,11 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, he
 // If an argument with given `name` is already registered, then panic
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool, help string) *Opt {
-	*b, name = isInvertedFlag(name)
-	v := newBoolValue(b)
-	o := commandConfig.AddValue(name, shortName, v, help)
-	o.IsBool = true
+	var val bool
+	val, name = isInvertedFlag(name)
+	v := newBoolValue(val, b)
+	o := commandConfig.AddValue(name, shortName, v, false, help)
+	o.IsFlag = true
 	o.IsInverted = *b
 	return o
 }
@@ -553,8 +573,8 @@ func (commandConfig *CommandConfig) AddMultiFlag(name, shortName string, b *[]bo
 	var isInverted bool
 	isInverted, name = isInvertedFlag(name)
 	v := newBoolArrayValue([]bool{}, b)
-	o := commandConfig.AddValue(name, shortName, v, help)
-	o.IsBool = true
+	o := commandConfig.AddValue(name, shortName, v, true, help)
+	o.IsFlag = true
 	o.IsInverted = isInverted
 	return o
 }
@@ -563,11 +583,13 @@ func (commandConfig *CommandConfig) AddMultiFlag(name, shortName string, b *[]bo
 
 // Opt type holds the structured information about a flag.
 type Opt struct {
-	Name       string // long name of the flag
-	ShortName  string // short name of the flag
-	Help       string // help message
-	IsBool     bool   // boolean flag
-	IsInverted bool   // inverted boolean flag
+	Name           string // long name of the flag
+	ShortName      string // short name of the flag
+	Help           string // help message
+	CompleterValue string // help for completer value (may be format, by default value type)
+	IsMultiValue   bool   // helper for completer
+	IsFlag         bool   // boolean flag (direct/inverted)
+	IsInverted     bool   // inverted boolean flag
 	// IsVariadic   bool   // true if can take multiple values
 	IsRequired  bool            // required value
 	ValidValues map[string]bool // valid values
@@ -641,6 +663,25 @@ func (o *Opt) Validate(s string) (isValid bool) {
 func (o *Opt) SetUsage(usage string) *Opt {
 	o.Help = usage
 	return o
+}
+
+// SetCompeterValue return comleter value
+// `*Opt` object returned.
+func (o *Opt) SetCompeterValue(competerValue string) *Opt {
+	if strings.Contains(competerValue, " ") {
+		o.CompleterValue = strconv.Quote(competerValue)
+	} else {
+		o.CompleterValue = competerValue
+	}
+	return o
+}
+
+// GetCompeterValue return comleter value
+func (o *Opt) GetCompeterValue() string {
+	if o.CompleterValue == "" {
+		return o.Value.Type()
+	}
+	return o.CompleterValue
 }
 
 /*---------------------*/

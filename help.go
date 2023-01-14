@@ -53,7 +53,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		if opt.ShortName != "" {
 			shortName += "-" + opt.ShortName + " | "
 		}
-		if !opt.IsBool {
+		if !opt.IsFlag {
 			nameAndArgs += " " + opt.Value.Type()
 		}
 		fmt.Printf("  %5s%-25s\t", shortName, nameAndArgs)

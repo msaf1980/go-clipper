@@ -42,5 +42,5 @@ func (d *durationValue) GetDuration() time.Duration { return time.Duration(*d) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddDuration(name, shortName string, value time.Duration, p *time.Duration, help string) *Opt {
 	v := newDurationValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

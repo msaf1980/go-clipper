@@ -65,7 +65,7 @@ func (i *ipValue) Type() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, p *net.IP, help string) *Opt {
 	v := newIPValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }
 
 // AddIPFromString registers an int argument configuration with the command.
@@ -75,5 +75,5 @@ func (commandConfig *CommandConfig) AddIP(name, shortName string, value net.IP, 
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddIPFromString(name, shortName string, value string, p *net.IP, help string) *Opt {
 	v := newIPValueFromString(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

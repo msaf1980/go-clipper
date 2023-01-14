@@ -136,7 +136,7 @@ func (s *stringArrayLValue) ResetWith(val []string) error {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value []string, p *[]string, help string) *Opt {
 	v := newStringArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // AddStringArrayFromCSV registers an string argument configuration with the command.
@@ -146,5 +146,5 @@ func (commandConfig *CommandConfig) AddStringArray(name, shortName string, value
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddStringArrayFromCSV(name, shortName string, value string, p *[]string, help string) *Opt {
 	v := newStringArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

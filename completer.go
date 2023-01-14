@@ -29,9 +29,14 @@ func appendCommands(registry *Registry, c []string, last, line string) []string 
 	return c
 }
 
-func appendFlags(commandConfig *CommandConfig, c []string, last, line string) []string {
+func appendFlags(commandConfig *CommandConfig, c []string, exclude map[string]bool, last, line string) []string {
 	for _, n := range commandConfig.OptsOrder {
 		opt := commandConfig.Opts[n]
+		if exclude != nil {
+			if _, ok := exclude[opt.Name]; ok {
+				continue
+			}
+		}
 		name := "--" + opt.Name
 		if name != last && strings.HasPrefix(name, last) {
 			if line == "" {
@@ -116,7 +121,7 @@ func SplitQuoted(s string) []string {
 	return sv
 }
 
-// CompleterAppended return slice of completer variants only without initial line
+// Completer return slice of completer variants with prepended initial line
 func (registry *Registry) Completer(line string) (c []string) {
 
 	var commandName string
@@ -126,66 +131,7 @@ func (registry *Registry) Completer(line string) (c []string) {
 		c = make([]string, 0, len(registry.Commands)+4)
 		commandConfig, ok := registry.Commands[commandName]
 		if ok {
-			c = appendFlags(commandConfig, c, "", "")
-		}
-		c = appendCommands(registry, c, "", "")
-		return
-	}
-	if len(sv) > 0 {
-		if !strings.HasPrefix(sv[0], "-") {
-			commandName = sv[0]
-		}
-	}
-
-	commandConfig, ok := registry.Commands[commandName]
-	if !ok {
-		c = make([]string, 0)
-		if len(sv) == 1 && !strings.HasPrefix(sv[0], "-") {
-			c = appendCommands(registry, c, sv[0], "")
-		}
-		return
-	}
-
-	if strings.HasSuffix(line, " ") {
-		// return flags for command
-
-		// new command, exclude already added
-		sm := make(map[string]bool)
-		for _, s := range sv {
-			if isFlag(s) {
-				sm[s] = true
-			}
-		}
-
-		c = make([]string, 0, len(commandConfig.Opts)*2)
-		c = appendFlags(commandConfig, c, "", "")
-
-	} else {
-		// complete last arg
-		last := sv[len(sv)-1]
-		c = make([]string, 0)
-		if strings.HasPrefix(last, "-") {
-			// complete flag
-			c = appendFlags(commandConfig, c, last, "")
-		} else if commandConfig == nil && len(sv) == 1 {
-			c = appendCommands(registry, c, last, "")
-		}
-	}
-
-	return
-}
-
-// CompleterAppended return slice of completer variants with prepended initial line
-func (registry *Registry) CompleterAppended(line string) (c []string) {
-
-	var commandName string
-	sv := SplitQuoted(line)
-
-	if len(sv) == 0 {
-		c = make([]string, 0, len(registry.Commands)+4)
-		commandConfig, ok := registry.Commands[commandName]
-		if ok {
-			c = appendFlags(commandConfig, c, "", line)
+			c = appendFlags(commandConfig, c, nil, "", line)
 		}
 		c = appendCommands(registry, c, "", line)
 		return
@@ -204,28 +150,39 @@ func (registry *Registry) CompleterAppended(line string) (c []string) {
 		}
 		return
 	}
+	last := sv[len(sv)-1]
 
 	if strings.HasSuffix(line, " ") {
-		// return flags for command
+		// return flags for command or flag value help
+
+		if opt := commandConfig.GetFlag(last); opt != nil {
+			if !opt.IsFlag {
+				// return flag value help
+				c = append(c, line+opt.GetCompeterValue())
+				return
+			}
+		}
 
 		// new command, exclude already added
 		sm := make(map[string]bool)
 		for _, s := range sv {
 			if isFlag(s) {
-				sm[s] = true
+				if opt := commandConfig.GetFlag(s); opt != nil && !opt.IsMultiValue {
+					sm[opt.Name] = true
+				}
 			}
 		}
 
 		c = make([]string, 0, len(commandConfig.Opts)*2)
-		c = appendFlags(commandConfig, c, "", line)
+		c = appendFlags(commandConfig, c, sm, "", line)
 
 	} else {
 		// complete last arg
-		last := sv[len(sv)-1]
+
 		c = make([]string, 0)
 		if strings.HasPrefix(last, "-") {
 			// complete flag
-			c = appendFlags(commandConfig, c, last, line)
+			c = appendFlags(commandConfig, c, nil, last, line)
 		} else if commandConfig == nil && len(sv) == 1 {
 			c = appendCommands(registry, c, last, line)
 		}

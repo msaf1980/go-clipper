@@ -40,5 +40,5 @@ func (f *float32Value) GetFloat32() float32 { return float32(*f) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddFloat32(name, shortName string, value float32, p *float32, help string) *Opt {
 	v := newFloat32Value(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

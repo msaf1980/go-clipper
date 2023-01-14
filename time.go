@@ -1,6 +1,8 @@
 package clipper
 
-import "time"
+import (
+	"time"
+)
 
 // -- time.Time Value
 type timeValue struct {
@@ -61,7 +63,8 @@ func (t *timeValue) GetTime() time.Time { return *t.value }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddTime(name, shortName string, value time.Time, p *time.Time, layout string, help string) *Opt {
 	v := newTimeValue(value, p, layout)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help).
+		SetCompeterValue(layout)
 }
 
 // AddTimeFromString registers an duration argument configuration with the command.
@@ -71,5 +74,6 @@ func (commandConfig *CommandConfig) AddTime(name, shortName string, value time.T
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddTimeFromString(name, shortName string, value string, p *time.Time, layout string, help string) *Opt {
 	v := newTimeValueFromString(value, p, layout)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help).
+		SetCompeterValue(layout)
 }

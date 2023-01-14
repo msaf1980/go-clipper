@@ -43,5 +43,5 @@ func (i *intValue) GetInt() int { return int(*i) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt(name, shortName string, value int, p *int, help string) *Opt {
 	v := newIntValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }

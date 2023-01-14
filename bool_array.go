@@ -89,7 +89,7 @@ func (s *boolArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddBoolArray(name, shortName string, value []bool, p *[]bool, help string) *Opt {
 	v := newBoolArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // AddBoolArrayFromCSV registers an int argument configuration with the command.
@@ -99,5 +99,5 @@ func (commandConfig *CommandConfig) AddBoolArray(name, shortName string, value [
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddBoolArrayFromCSV(name, shortName string, value string, p *[]bool, help string) *Opt {
 	v := newboolArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

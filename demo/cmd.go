@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/msaf1980/go-clipper"
 )
@@ -22,8 +23,12 @@ func main() {
 
 		list, listDir []string
 
-		typesNum     []int
-		typesVerbose []bool
+		typesNum        []int
+		typesVerbose    []bool
+		typesTime       time.Time
+		typesSTime      time.Time
+		timeLayout      = "2006-01-02 15:04:05"
+		typesLayoutTime time.Time
 	)
 
 	// create a new registry
@@ -58,9 +63,16 @@ func main() {
 	ghostCommand, _ := registry.Register("ghost", "ghost help")
 	ghostCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 
+	now := time.Now()
+
 	typesCommand, _ := registry.Register("types", "")                              // sub-command
 	typesCommand.AddIntArray("num", "n", []int{1, 24, -2}, &typesNum, "int array") // --num, -n | default value: []int
 	typesCommand.AddMultiFlag("verbose", "v", &typesVerbose, "")                   // --verbose, -v | default value: []
+	typesCommand.AddTime("time", "", now, &typesTime, time.RFC3339Nano, "time with time.RFC3339Nano layout")
+	typesCommand.AddTimeFromString("stime", "", now.Format(time.RFC3339Nano), &typesSTime, time.RFC3339Nano, "time from string with time.RFC3339Nano layout")
+	typesCommand.AddTimeFromString("ltime", "", now.Format(timeLayout), &typesLayoutTime, timeLayout,
+		"time from string with "+timeLayout+" layout").
+		SetCompeterValue(now.Format(timeLayout)) // compeleter value to default value
 
 	/*----------------*/
 

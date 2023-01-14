@@ -89,7 +89,7 @@ func (s *int8ArrayValue) String() string {
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt8Array(name, shortName string, value []int8, p *[]int8, help string) *Opt {
 	v := newInt8ArrayValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
 // AddInt8ArrayFromCSV registers an int argument configuration with the command.
@@ -99,5 +99,5 @@ func (commandConfig *CommandConfig) AddInt8Array(name, shortName string, value [
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddInt8ArrayFromCSV(name, shortName string, value string, p *[]int8, help string) *Opt {
 	v := newInt8ArrayValueFromCSV(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, true, help)
 }

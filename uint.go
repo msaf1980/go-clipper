@@ -42,5 +42,5 @@ func (u *uintValue) GetUint() uint { return uint(*u) }
 // registered `*Opt` object returned.
 func (commandConfig *CommandConfig) AddUint(name, shortName string, value uint, p *uint, help string) *Opt {
 	v := newUintValue(value, p)
-	return commandConfig.AddValue(name, shortName, v, help)
+	return commandConfig.AddValue(name, shortName, v, false, help)
 }
