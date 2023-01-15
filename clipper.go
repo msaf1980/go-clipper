@@ -321,6 +321,18 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 		}
 	}
 
+	for _, o := range commandConfig.Opts {
+		if o.EnvName != "" {
+			if val := os.Getenv(o.EnvName); val != "" {
+				if !dryRun {
+					if err = o.Set(val); err != nil {
+						return commandName, false, WrapInvalidValue(o.Name+" from "+o.EnvName, err)
+					}
+				}
+			}
+		}
+	}
+
 	// process all command-line arguments (except command name)
 	for {
 
@@ -585,6 +597,7 @@ func (commandConfig *CommandConfig) AddMultiFlag(name, shortName string, b *[]bo
 type Opt struct {
 	Name           string // long name of the flag
 	ShortName      string // short name of the flag
+	EnvName        string // OS environment variable name
 	Help           string // help message
 	CompleterValue string // help for completer value (may be format, by default value type)
 	IsMultiValue   bool   // helper for completer
@@ -682,6 +695,13 @@ func (o *Opt) GetCompeterValue() string {
 		return o.Value.Type()
 	}
 	return o.CompleterValue
+}
+
+// AttachEnv set OS environment name, which used for set variable before parse other args
+// `*Opt` object returned.
+func (o *Opt) AttachEnv(envName string) *Opt {
+	o.EnvName = envName
+	return o
 }
 
 /*---------------------*/

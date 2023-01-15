@@ -56,7 +56,11 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		if !opt.IsFlag {
 			nameAndArgs += " " + opt.Value.Type()
 		}
-		fmt.Printf("  %5s%-25s\t", shortName, nameAndArgs)
+		var envName string
+		if opt.EnvName != "" {
+			envName = " | env " + opt.EnvName
+		}
+		fmt.Printf("  %5s%-20s%-20s ", shortName, nameAndArgs, envName)
 		if opt.Help != "" {
 			fmt.Printf("%s ", opt.Help)
 		}
@@ -66,7 +70,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 			fmt.Printf("(default: %q)\n", opt.defaultStr)
 		}
 	}
-	fmt.Printf("  -h | %-25s\thelp", "--help")
+	fmt.Printf("  -h | %-20s%20s help", "--help", "")
 	if commandName == "" {
 		fmt.Println("")
 	} else {

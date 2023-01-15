@@ -1140,7 +1140,7 @@ func TestInvalidArg(t *testing.T) {
 }
 
 // test validate flag
-func TestDiabledArgs(t *testing.T) {
+func TestDisabledArgs(t *testing.T) {
 	// options
 	options := []string{"info", "student", "-V", "2.0.1", "-v"}
 
@@ -1155,6 +1155,42 @@ func TestDiabledArgs(t *testing.T) {
 		want := "error => clipper.ErrorUnsupportedFlag{Name:\"student\"}\n"
 		if out != want {
 			t.Fatalf("got\n%q\nwant\n%q", out, want)
+		}
+	}
+}
+
+// test sub-command with options
+func TestValueFromEnv(t *testing.T) {
+
+	// options list
+	optionsList := [][]string{
+		{"types"},
+	}
+	for _, options := range optionsList {
+		// command
+		cmd := exec.Command("go", append([]string{"run", "demo/cmd.go"}, options...)...)
+		cmd.Env = append(cmd.Environ(), "TYPES_NUM=2")
+
+		// get output
+		if output, err := cmd.Output(); err != nil {
+			t.Fatalf("Error: %v, out: %q", err, string(output))
+		} else {
+			lines := []string{
+				`sub-command => "types"`,
+				`Dump variables`,
+				`  num="[2]"`,
+				`  verbose="[]"`,
+				`  time="2023-01-15T21:41:29.98589753+05:00"`,
+				`  stime="2023-01-15T21:41:29.98589753+05:00"`,
+				`  ltime="2023-01-15 21:41:29"`,
+			}
+
+			out := string(output)
+			for _, line := range lines {
+				if !strings.Contains(out, line) {
+					t.Fatalf("got\n%q\nwant line\n%q", output, line)
+				}
+			}
 		}
 	}
 }
