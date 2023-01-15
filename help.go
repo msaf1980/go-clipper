@@ -70,7 +70,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 			fmt.Printf("(default: %q)\n", opt.defaultStr)
 		}
 	}
-	fmt.Printf("  -h | %-20s%20s help", "--help", "")
+	fmt.Printf("  -h | %-20s%30s help", "--help", "")
 	if commandName == "" {
 		fmt.Println("")
 	} else {
