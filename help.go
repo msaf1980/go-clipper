@@ -58,9 +58,9 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		}
 		var envName string
 		if opt.EnvName != "" {
-			envName = " | env " + opt.EnvName
+			envName = " | " + opt.EnvName
 		}
-		fmt.Printf("  %5s%-20s%-20s ", shortName, nameAndArgs, envName)
+		fmt.Printf("  %5s%-20s%-30s ", shortName, nameAndArgs, envName)
 		if opt.Help != "" {
 			fmt.Printf("%s ", opt.Help)
 		}
