@@ -205,6 +205,13 @@ func TestCompleter(t *testing.T) {
 			},
 		},
 		{
+			line: "types -n ",
+			// version value helper
+			want: []string{
+				"types -n 1 intArray",
+			},
+		},
+		{
 			line: "info -v",
 			// not flags for info cmd starts with "-v" except "-v"
 			want: []string{},
@@ -223,14 +230,16 @@ func TestCompleter(t *testing.T) {
 			line: "info -V ",
 			// version value helper
 			want: []string{
-				"info -V string",
+				"info -V 1.0.1",
+				"info -V 2.0.0",
 			},
 		},
 		{
 			line: "info --version ",
 			// version value helper
 			want: []string{
-				"info --version string",
+				"info --version 1.0.1",
+				"info --version 2.0.0",
 			},
 		},
 		{

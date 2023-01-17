@@ -158,7 +158,21 @@ func (registry *Registry) Completer(line string) (c []string) {
 		if opt := commandConfig.GetFlag(last); opt != nil {
 			if !opt.IsFlag {
 				// return flag value help
-				c = append(c, line+opt.GetCompeterValue())
+				if len(opt.ValidValues) == 0 {
+					c = append(c, line+opt.GetCompeterValue())
+				} else {
+					vals := make([]string, 0, len(opt.ValidValues))
+					for v := range opt.ValidValues {
+						vals = append(vals, v)
+					}
+					sort.Strings(vals)
+
+					for _, v := range vals {
+						if v != "" {
+							c = append(c, line+v)
+						}
+					}
+				}
 				return
 			}
 		}
