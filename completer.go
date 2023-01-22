@@ -163,14 +163,14 @@ func (registry *Registry) Completer(line string) (c []string) {
 				} else {
 					vals := make([]string, 0, len(opt.ValidValues))
 					for v := range opt.ValidValues {
-						vals = append(vals, v)
+						if v != "" {
+							vals = append(vals, v)
+						}
 					}
 					sort.Strings(vals)
 
 					for _, v := range vals {
-						if v != "" {
-							c = append(c, line+v)
-						}
+						c = append(c, line+v)
 					}
 				}
 				return

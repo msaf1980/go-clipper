@@ -208,7 +208,7 @@ func TestCompleter(t *testing.T) {
 			line: "types -n ",
 			// version value helper
 			want: []string{
-				"types -n 1 intArray",
+				"types -n intArray",
 			},
 		},
 		{

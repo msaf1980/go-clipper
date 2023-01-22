@@ -33,7 +33,7 @@ func (s *uint64ArrayValue) Set(val string, doAppend bool) error {
 	}
 	iv := make([]uint64, 0, len(v))
 	for _, s := range v {
-		if n, err := strconv.ParseUint(s, 10, 64); err == nil {
+		if n, err := uint64NFromString(s); err == nil {
 			iv = append(iv, n)
 		} else {
 			return err
@@ -82,7 +82,7 @@ func (s *uint64ArrayValue) String() string {
 	return "[" + strings.Join(strSlice, ",") + "]"
 }
 
-// AddIntArray registers an int argument configuration with the command.
+// AddUint64Array registers an int argument configuration with the command.
 // The `name` argument represents the name of the argument.
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
@@ -92,7 +92,7 @@ func (commandConfig *CommandConfig) AddUint64Array(name, shortName string, value
 	return commandConfig.AddValue(name, shortName, v, true, help)
 }
 
-// AddIntArrayFromCSV registers an int argument configuration with the command.
+// AddUint64ArrayFromCSV registers an int argument configuration with the command.
 // The `name` argument represents the name of the argument.
 // The `shortName` argument represents the short alias of the argument.
 // If an argument with given `name` is already registered, then panic
