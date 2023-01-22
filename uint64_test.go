@@ -25,6 +25,10 @@ func TestUint64_0(t *testing.T) {
 	err = v.Set(strconv.FormatInt(math.MinInt64, 10), true)
 	require.Error(t, err)
 	require.Equal(t, uint64(math.MaxInt64), n)
+
+	err = v.Set("1Ki", true)
+	require.NoError(t, err)
+	require.Equal(t, uint64(1000), n)
 }
 
 func TestUint64_12(t *testing.T) {
