@@ -8,7 +8,7 @@ import (
 
 func PrintHelp(registry *Registry, commandName string, commandConfig *CommandConfig, printCmdName bool) {
 
-	if commandConfig == nil {
+	if commandConfig == nil && commandName != "" {
 		fmt.Fprintf(os.Stderr, "\n  command %q not registered\n", commandName)
 		return
 	}
@@ -36,60 +36,64 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 			fmt.Printf("  %s\t%s\n", command, registry.Commands[command].Help)
 		}
 
-		fmt.Printf("\n%s\n\n", commandConfig.Help)
+		if commandConfig != nil {
+			fmt.Printf("\n%s\n\n", commandConfig.Help)
+		}
 	} else {
 		fmt.Printf("%s\n\n", commandConfig.Help)
 	}
 
-	fmt.Println("Flags:")
-	for _, flagName := range commandConfig.OptsOrder {
-		opt := commandConfig.Opts[flagName]
-		nameAndArgs := "--"
-		if opt.IsInverted {
-			nameAndArgs += "no-"
+	if commandConfig != nil {
+		fmt.Println("Flags:")
+		for _, flagName := range commandConfig.OptsOrder {
+			opt := commandConfig.Opts[flagName]
+			nameAndArgs := "--"
+			if opt.IsInverted {
+				nameAndArgs += "no-"
+			}
+			nameAndArgs += opt.Name
+			shortName := ""
+			if opt.ShortName != "" {
+				shortName += "-" + opt.ShortName + " | "
+			}
+			if !opt.IsFlag {
+				nameAndArgs += " " + opt.Value.Type()
+			}
+			var envName string
+			if opt.EnvName != "" {
+				envName = " | " + opt.EnvName
+			}
+			fmt.Printf("  %5s%-20s%-30s ", shortName, nameAndArgs, envName)
+			if opt.Help != "" {
+				fmt.Printf("%s ", opt.Help)
+			}
+			if opt.IsRequired {
+				fmt.Printf("(required)\n")
+			} else {
+				fmt.Printf("(default: %q)\n", opt.defaultStr)
+			}
 		}
-		nameAndArgs += opt.Name
-		shortName := ""
-		if opt.ShortName != "" {
-			shortName += "-" + opt.ShortName + " | "
-		}
-		if !opt.IsFlag {
-			nameAndArgs += " " + opt.Value.Type()
-		}
-		var envName string
-		if opt.EnvName != "" {
-			envName = " | " + opt.EnvName
-		}
-		fmt.Printf("  %5s%-20s%-30s ", shortName, nameAndArgs, envName)
-		if opt.Help != "" {
-			fmt.Printf("%s ", opt.Help)
-		}
-		if opt.IsRequired {
-			fmt.Printf("(required)\n")
+		fmt.Printf("  -h | %-20s%30s help", "--help", "")
+		if commandName == "" {
+			fmt.Println("")
 		} else {
-			fmt.Printf("(default: %q)\n", opt.defaultStr)
+			fmt.Printf(" for %s\n", commandName)
 		}
-	}
-	fmt.Printf("  -h | %-20s%30s help", "--help", "")
-	if commandName == "" {
-		fmt.Println("")
-	} else {
-		fmt.Printf(" for %s\n", commandName)
-	}
 
-	if _, ok := commandConfig.Args.(None); !ok {
-		fmt.Printf("\nUnnamed args (%s)", commandConfig.ArgsHelp)
-		min := commandConfig.Args.MinLen()
-		max := commandConfig.Args.MaxLen()
-		if min > 0 || max >= 0 {
-			fmt.Println(":")
-			if min > 0 {
-				fmt.Printf(" min length %d", min)
+		if _, ok := commandConfig.Args.(None); !ok {
+			fmt.Printf("\nUnnamed args (%s)", commandConfig.ArgsHelp)
+			min := commandConfig.Args.MinLen()
+			max := commandConfig.Args.MaxLen()
+			if min > 0 || max >= 0 {
+				fmt.Println(":")
+				if min > 0 {
+					fmt.Printf(" min length %d", min)
+				}
+				if max >= 0 {
+					fmt.Printf(" max length %d", max)
+				}
 			}
-			if max >= 0 {
-				fmt.Printf(" max length %d", max)
-			}
+			fmt.Println("")
 		}
-		fmt.Println("")
 	}
 }

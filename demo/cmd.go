@@ -75,6 +75,8 @@ func main() {
 		"time from string with "+timeLayout+" layout").
 		SetCompeterValue(tm.Format(timeLayout)) // compeleter value to default value
 
+	registry.RegisterHelp("help", "display help", true, true)
+
 	/*----------------*/
 
 	// parse command-line arguments

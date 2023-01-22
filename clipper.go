@@ -224,6 +224,19 @@ func NewRegistry(description string) *Registry {
 // If a command is already registered, the registered `*CommandConfig` object is returned.
 // If the command is already registered, second return value will be `true`.
 func (registry *Registry) Register(name string, help string) (*CommandConfig, bool) {
+	return registry.register(name, help, nil)
+}
+
+// RegisterWithCallback method registers a command.
+// The "name" argument should be a simple string.
+// If "name" is an empty string, it is considered as a root command.
+// If a command is already registered, the registered `*CommandConfig` object is returned.
+// If the command is already registered, second return value will be `true`.
+func (registry *Registry) RegisterWithCallback(name string, help string, callback func() error) (*CommandConfig, bool) {
+	return registry.register(name, help, callback)
+}
+
+func (registry *Registry) register(name string, help string, callback func() error) (*CommandConfig, bool) {
 
 	// remove all whitespaces
 	commandName := removeWhitespaces(name)
@@ -235,17 +248,30 @@ func (registry *Registry) Register(name string, help string) (*CommandConfig, bo
 
 	// construct new `CommandConfig` object
 	commandConfig := &CommandConfig{
-		Name:  commandName,
-		Help:  help,
-		Opts:  make(map[string]*Opt),
-		short: make(map[string]string),
-		Args:  None{}, // by default disable unnamed args
+		Name:     commandName,
+		Help:     help,
+		Opts:     make(map[string]*Opt),
+		short:    make(map[string]string),
+		Args:     None{}, // by default disable unnamed args
+		Callback: callback,
 	}
 
 	// add entry to the registry
 	registry.Commands[commandName] = commandConfig
 
 	return commandConfig, false
+}
+
+// AddHelp method register a help command callback.
+func (registry *Registry) RegisterHelp(name string, help string, printCmdName, exitOnHelp bool) {
+	registry.RegisterWithCallback(name, help, func() error {
+		commandConfig := registry.Commands[""]
+		PrintHelp(registry, "", commandConfig, printCmdName)
+		if exitOnHelp {
+			os.Exit(0)
+		}
+		return nil
+	})
 }
 
 // Reset method reset all values to it's default values.
@@ -429,6 +455,11 @@ func (registry *Registry) ParseOpt(values []string, exitOnHelp bool, dryRun bool
 		}
 	}
 
+	if commandConfig.Callback != nil {
+		err = commandConfig.Callback()
+		return commandName, false, err
+	}
+
 	return commandName, false, nil
 }
 
@@ -456,6 +487,8 @@ type CommandConfig struct {
 	Args Arg
 	// help message for command unnamed arguments
 	ArgsHelp string
+
+	Callback func() error
 }
 
 // Reset method reset values to it's default values.

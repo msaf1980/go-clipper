@@ -1,6 +1,7 @@
 package clipper
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -1193,4 +1194,33 @@ func TestValueFromEnv(t *testing.T) {
 			}
 		}
 	}
+}
+
+// -------------------------------------------------
+var errTestAlreadyChanged = errors.New("test flag already changed")
+
+func TestCallback(t *testing.T) {
+	var out int
+
+	// create a new registry
+	registry := NewRegistry("")
+
+	// register the root command
+	registry.RegisterWithCallback("", "", func() error {
+		if out == 0 {
+			out++
+			return nil
+		}
+		return errTestAlreadyChanged
+	})
+
+	got, err := registry.Parse([]string{})
+	assert.Equal(t, "", got)
+	assert.Equal(t, 1, out)
+	require.NoError(t, err)
+
+	got, err = registry.Parse([]string{})
+	assert.Equal(t, "", got)
+	assert.Equal(t, 1, out)
+	require.ErrorIs(t, err, errTestAlreadyChanged)
 }
