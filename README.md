@@ -58,7 +58,7 @@ func main() {
 		rootCommand.AddFlag("verbose", "v", &rootVerbose, "flag help")         // --verbose, -v | default value: "false"
 		rootCommand.AddString("dir", "d", "/var/users", &rootDir, "flag help") // --dir <value> | default value: "/var/users"
 		rootCommand.AddStringArgs(-1, &root, "args help") // root unnamed args
-        rootCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
+		rootCommand.AddVersionHelper("version", "V", registry.Description, VERSION)
 	}
 
 	// register the `info` sub-command
