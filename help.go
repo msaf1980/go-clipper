@@ -63,7 +63,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 			if opt.EnvName != "" {
 				envName = " | " + opt.EnvName
 			}
-			fmt.Printf("  %5s%-20s%-30s ", shortName, nameAndArgs, envName)
+			fmt.Printf("  %5s%-25s%-30s ", shortName, nameAndArgs, envName)
 			if opt.Help != "" {
 				fmt.Printf("%s ", opt.Help)
 			}
@@ -73,7 +73,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 				fmt.Printf("(default: %q)\n", opt.defaultStr)
 			}
 		}
-		fmt.Printf("  -h | %-20s%30s help", "--help", "")
+		fmt.Printf("  -h | %-25s%30s help", "--help", "")
 		if commandName == "" {
 			fmt.Println("")
 		} else {
