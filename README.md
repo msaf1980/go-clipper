@@ -82,7 +82,7 @@ func main() {
 	/*----------------*/
 
 	// parse command-line arguments
-	command, err := registry.Parse(os.Args[1:], true)
+	command, err := registry.Parse(os.Args[1:])
 
    	// For interactive use (don't exit after help print, check helpRequested and break command execution if set)
    	// command, helpRequested, err := registry.ParseInteract(os.Args[1:], false)
