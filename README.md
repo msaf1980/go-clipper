@@ -52,7 +52,7 @@ func main() {
 
 	// register the root command
 	if _, ok := os.LookupEnv("NO_ROOT"); !ok {
-		rootCommand, _ := registry.Register("root help") // root command
+		rootCommand, _ := registry.Register("", "root help") // root command
 		// rootCommand.AddArg("output", "")                    //
 		rootCommand.AddFlag("force", "f", &rootForce, "flag help")             // --force, -f | default value: "false"
 		rootCommand.AddFlag("verbose", "v", &rootVerbose, "flag help")         // --verbose, -v | default value: "false"
