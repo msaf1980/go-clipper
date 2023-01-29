@@ -33,7 +33,7 @@ func PrintHelp(registry *Registry, commandName string, commandConfig *CommandCon
 		sort.Strings(commands)
 		fmt.Println("Available Commands:")
 		for _, command := range commands {
-			fmt.Printf("  %s\t%s\n", command, registry.Commands[command].Help)
+			fmt.Printf(" %20s\t%s\n", command, registry.Commands[command].Help)
 		}
 
 		if commandConfig != nil {
