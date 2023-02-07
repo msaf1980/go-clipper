@@ -1180,7 +1180,7 @@ func TestValueFromEnv(t *testing.T) {
 				`sub-command => "types"`,
 				`Dump variables`,
 				`  num="[2]"`,
-				`  verbose="[]"`,
+				`  verbose="0"`,
 				`  time="2023-01-15T21:41:29.98589753+05:00"`,
 				`  stime="2023-01-15T21:41:29.98589753+05:00"`,
 				`  ltime="2023-01-15 21:41:29"`,

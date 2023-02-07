@@ -24,7 +24,7 @@ func main() {
 		list, listDir []string
 
 		typesNum        []int
-		typesVerbose    []bool
+		typesVerbose    int
 		typesTime       time.Time
 		typesSTime      time.Time
 		timeLayout      = "2006-01-02 15:04:05"
@@ -68,7 +68,8 @@ func main() {
 	typesCommand, _ := registry.Register("types", "")                               // sub-command
 	typesCommand.AddIntArray("num", "n", []int{1, 24, -2}, &typesNum, "int array"). // --num, -n | default value: []int
 											AttachEnv("TYPES_NUM") // try to read value from os env var
-	typesCommand.AddMultiFlag("verbose", "v", &typesVerbose, "") // --verbose, -v | default value: []
+	// typesCommand.AddMultiFlag("verbose", "v", &typesVerbose, "") // --verbose, -v | default value: []
+	typesCommand.AddCounterFlag("verbose", "v", &typesVerbose, "") // --verbose, -v | default value: 0
 	typesCommand.AddTime("time", "", tm, &typesTime, time.RFC3339Nano, "time with time.RFC3339Nano layout")
 	typesCommand.AddTimeFromString("stime", "", tm.Format(time.RFC3339Nano), &typesSTime, time.RFC3339Nano, "time from string with time.RFC3339Nano layout")
 	typesCommand.AddTimeFromString("ltime", "", tm.Format(timeLayout), &typesLayoutTime, timeLayout,

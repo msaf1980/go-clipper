@@ -29,12 +29,12 @@ func (i *int16Value) Type() string {
 }
 
 func (i *int16Value) Get() interface{} {
-	return i.Getint16()
+	return i.GetInt16()
 }
 
 func (i *int16Value) String() string { return strconv.FormatInt(int64(*i), 10) }
 
-func (i *int16Value) Getint16() int16 { return int16(*i) }
+func (i *int16Value) GetInt16() int16 { return int16(*i) }
 
 // AddInt16 registers an int argument configuration with the command.
 // The `name` argument represents the name of the argument.

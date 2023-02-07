@@ -608,7 +608,7 @@ func (commandConfig *CommandConfig) AddFlag(name, shortName string, b *bool, hel
 	return o
 }
 
-// AddMultiFlag registers an bool (direct/inverted) flag with the command.
+// AddMultiFlag registers an bool (direct/inverted) multi-flag with the command (for cases like -vvv).
 // The `name` argument represents the name of the argument.
 // If value of the `name` argument starts with `no-` prefix, then it is a inverted flag.
 // The `shortName` argument represents the short alias of the argument.

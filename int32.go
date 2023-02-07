@@ -29,12 +29,12 @@ func (i *int32Value) Type() string {
 }
 
 func (i *int32Value) Get() interface{} {
-	return i.Getint32()
+	return i.GetInt32()
 }
 
 func (i *int32Value) String() string { return strconv.FormatInt(int64(*i), 10) }
 
-func (i *int32Value) Getint32() int32 { return int32(*i) }
+func (i *int32Value) GetInt32() int32 { return int32(*i) }
 
 // AddInt32 registers an int argument configuration with the command.
 // The `name` argument represents the name of the argument.

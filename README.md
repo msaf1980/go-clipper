@@ -44,7 +44,7 @@ func main() {
 		infoVersion, infoOutput  string
 
 		list, listDir []string
-		listVerbose []bool
+		listVerbose int
 	)
 
 	// create a new registry
@@ -73,7 +73,7 @@ func main() {
 	listCommand, _ := registry.Register("list", "list help")                     // sub-command
 	listCommand.AddStringArray("dir", "d", []string{"a"}, &listDir, "flag help") // --output, -o <value> | default value: "./"
 	listCommand.AddStringArgs(-1, &list, "args help")
-	listCommand.AddMultiFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: []
+	listCommand.AddCounterFlag("verbose", "v", &listVerbose, "multi-flag verbose") // --verbose, -v | default value: 0
 
 	// register the `ghost` sub-command
 	ghostCommand, _ := registry.Register("ghost", "ghost help")

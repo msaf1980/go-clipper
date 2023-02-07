@@ -29,12 +29,12 @@ func (i *int8Value) Type() string {
 }
 
 func (i *int8Value) Get() interface{} {
-	return i.Getint8()
+	return i.GetInt8()
 }
 
 func (i *int8Value) String() string { return strconv.FormatInt(int64(*i), 10) }
 
-func (i *int8Value) Getint8() int8 { return int8(*i) }
+func (i *int8Value) GetInt8() int8 { return int8(*i) }
 
 // AddInt8 registers an int argument configuration with the command.
 // The `name` argument represents the name of the argument.
