@@ -562,7 +562,7 @@ func (commandConfig *CommandConfig) AddValue(name, shortName string, v Value, is
 
 	// return if argument is already registered
 	if _, ok := commandConfig.Opts[name]; ok {
-		panic(name + " already registered")
+		panic("command '" + name + "' already registered")
 	}
 
 	// create `Arg` object
